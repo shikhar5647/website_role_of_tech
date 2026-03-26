@@ -1,0 +1,48 @@
+.footer {
+  background: #0b1120;
+  border-top: 1px solid rgba(56, 189, 248, 0.1);
+  padding: 3rem 1.5rem 2rem;
+  margin-top: auto;
+}
+
+.footer-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.footer-brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  color: #38bdf8;
+  font-weight: 700;
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.footer-course {
+  color: #94a3b8;
+  font-size: 0.85rem;
+  margin: 0.25rem 0;
+}
+
+.footer-note {
+  color: #64748b;
+  font-size: 0.8rem;
+  max-width: 500px;
+  margin: 0.75rem auto;
+  line-height: 1.5;
+}
+
+.footer-divider {
+  height: 1px;
+  background: rgba(56, 189, 248, 0.08);
+  margin: 1.5rem 0;
+}
+
+.footer-copy {
+  color: #475569;
+  font-size: 0.75rem;
+}
