@@ -64,7 +64,7 @@ const researchQ1Items = [
           assumption fundamentally enabled by the IGNP.
         </p>
         <p>
-          The campus infrastructure — including hostels housing 3000+ students, faculty residences,
+          The campus infrastructure — including hostels housing 5000+ students, faculty residences,
           academic buildings, laboratories, a central library, sports facilities, and extensive
           landscaping — all depend on a reliable water supply. <strong>Water scarcity was not a
           central concern during planning</strong> precisely because the IGNP had already
