@@ -10,7 +10,7 @@ const teamMembers = [
     role: 'Research , Interviews and website coding ',
     branch: 'B.Tech, Department of Chemical Engineering',
     email: 'b22ch032@iitj.ac.in',
-    photo: null, // Replace with: '/team/member1.jpg'
+    photo: 'website_role_of_tech/src/photos/profile_pic.jpeg', // Replace with: '/team/member1.jpg'
   },
   {
     name: 'Karan Pratap Singh Rathore',
