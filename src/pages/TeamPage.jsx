@@ -17,7 +17,7 @@ const teamMembers = [
     role: 'Interviews & Documentation',
     branch: 'B.Tech, Department of Chemical Engineering',
     email: 'b22ch013@iitj.ac.in',
-    photo: null,
+    photo: './photos/karan_pic.jpeg', // Replace with: '/team/member2.jpg'
   },
   {
     name: 'Devam Patel',
@@ -31,21 +31,21 @@ const teamMembers = [
     role: 'Field Research & Photography',
     branch: 'B.Tech, Department of Chemical Engineering ',
     email: 'b22ch010@iitj.ac.in',
-    photo: null,
+    photo: './photos/dhruv_pic.jpeg', // Replace with: '/team/member3.jpg'
   },
   {
     name: 'Avichal Sinha',
     role: 'Data Analysis & Writing',
     branch: 'B.Tech, Department of Chemical Engineering',
     email: 'b22ch004@iitj.ac.in',
-    photo: null,
+    photo: './photos/Avichal-Sinha-Image.jpeg',
   },
   {
     name: 'Ishaan Pandey',
     role: 'Literature Review & Citations',
     branch: 'B.Tech, Department of Civil and Infrastructure Engineering',
     email: 'b22ci017@iitj.ac.in',
-    photo: null,
+    photo: './photos/pandey_pic.jpeg', // Replace with: '/team/member6.jpg'
   },
 ];
 
@@ -114,7 +114,7 @@ export default function TeamPage() {
         <SectionHeader
           tag="Team"
           title="Student Researchers"
-          subtitle="Cluster B — IIT Jodhpur team exploring the canal-campus nexus."
+          subtitle="Cluster B : IIT Jodhpur team exploring the canal-campus nexus."
         />
 
         <div className="team-grid">
@@ -175,7 +175,7 @@ export default function TeamPage() {
           </p>
           <p>
             This project is part of the course <strong>"The Role of Technology in Development"</strong>,
-            offered by the Department of Humanities and Social Sciences at IIT Jodhpur.
+            offered by the School of Liberal Arts .
           </p>
         </motion.div>
       </section>
