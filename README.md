@@ -63,7 +63,7 @@ The project addresses the following core research questions:
 
 ```bash
 # Clone the repository
-git clone https://github.com/YOUR_USERNAME/website-role-of-tech.git
+git clone https://github.com/shikhar5647/website-role-of-tech.git
 cd website-role-of-tech
 
 # Install dependencies
