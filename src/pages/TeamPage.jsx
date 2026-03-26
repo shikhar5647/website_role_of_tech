@@ -6,53 +6,53 @@ import './TeamPage.css';
 // Replace with your actual team member details
 const teamMembers = [
   {
-    name: 'Team Member 1',
-    role: 'Research & Content',
-    branch: 'B.Tech, Department of XYZ',
-    email: 'member1@iitj.ac.in',
+    name: 'Shikhar Dave',
+    role: 'Research , Interviews and website coding ',
+    branch: 'B.Tech, Department of Chemical Engineering',
+    email: 'b22ch032@iitj.ac.in',
     photo: null, // Replace with: '/team/member1.jpg'
   },
   {
-    name: 'Team Member 2',
+    name: 'Karan Pratap Singh Rathore',
     role: 'Interviews & Documentation',
-    branch: 'B.Tech, Department of XYZ',
-    email: 'member2@iitj.ac.in',
+    branch: 'B.Tech, Department of Chemical Engineering',
+    email: 'b22ch013@iitj.ac.in',
     photo: null,
   },
   {
-    name: 'Team Member 3',
+    name: 'Devam Patel',
     role: 'Web Development & Design',
-    branch: 'B.Tech, Department of XYZ',
-    email: 'member3@iitj.ac.in',
+    branch: 'B.Tech, Department of Chemical Engineering',
+    email: 'b22ch021@iitj.ac.in',
     photo: null,
   },
   {
-    name: 'Team Member 4',
+    name: 'Dhruv Kumar Singh',
     role: 'Field Research & Photography',
-    branch: 'B.Tech, Department of XYZ',
-    email: 'member4@iitj.ac.in',
+    branch: 'B.Tech, Department of Chemical Engineering ',
+    email: 'b22ch010@iitj.ac.in',
     photo: null,
   },
   {
-    name: 'Team Member 5',
+    name: 'Avichal Sinha',
     role: 'Data Analysis & Writing',
-    branch: 'B.Tech, Department of XYZ',
-    email: 'member5@iitj.ac.in',
+    branch: 'B.Tech, Department of Chemical Engineering',
+    email: 'b22ch004@iitj.ac.in',
     photo: null,
   },
   {
-    name: 'Team Member 6',
+    name: 'Ishaan Pandey',
     role: 'Literature Review & Citations',
-    branch: 'B.Tech, Department of XYZ',
-    email: 'member6@iitj.ac.in',
+    branch: 'B.Tech, Department of Civil and Infrastructure Engineering',
+    email: 'b22ci017@iitj.ac.in',
     photo: null,
   },
 ];
 
 const faculty = {
-  name: 'Prof. [Faculty Name]',
+  name: 'Prof. Rachel Philip',
   designation: 'Course Instructor',
-  department: 'Department of Humanities & Social Sciences',
+  department: 'School of Liberal Arts',
   institution: 'Indian Institute of Technology, Jodhpur',
   photo: null, // Replace with actual photo path
 };
