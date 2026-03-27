@@ -136,8 +136,8 @@ const gallery = [
   },
   {
     id: 3,
-    src: null,
-    caption: 'Water Storage Infrastructure on Campus — Add your photo here',
+    src: '/gallery/IGC_desert.jpg',
+    caption: 'Water Storage Infrastructure on Campus',
   },
   {
     id: 4,
@@ -146,13 +146,13 @@ const gallery = [
   },
   {
     id: 5,
-    src: null,
-    caption: 'Canal Distribution Network — Add your photo here',
+    src: '/gallery/canal_view.jpg',
+    caption: 'Canal Distribution Network',
   },
   {
     id: 6,
-    src: null,
-    caption: 'Campus Landscaping & Water Usage — Add your photo here',
+    src: '/gallery/map_IGC.png',
+    caption: 'Map of Indira Gandhi Canal',
   },
 ];
 
