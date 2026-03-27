@@ -107,7 +107,7 @@ A: [Interviewee response]`,
 const gallery = [
   {
     id: 1,
-    src: 'src/pages/photos/meeting_sir.jpeg', 
+    src: '/gallery/meeting_sir.jpeg', 
     caption: 'Meet with Santosh sir',
   },
   {
