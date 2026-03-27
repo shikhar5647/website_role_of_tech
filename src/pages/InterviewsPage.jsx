@@ -141,8 +141,8 @@ const gallery = [
   },
   {
     id: 4,
-    src: null,
-    caption: 'Interview in Progress — Add your photo here',
+    src: '/gallery/interview_sir.jpeg',
+    caption: 'Shikhar and Karan asking questions to Santosh sir during the interview',
   },
   {
     id: 5,
