@@ -11,8 +11,8 @@ import './InterviewsPage.css';
 const interviews = [
   {
     id: 1,
-    name: 'Interview Subject 1',
-    role: 'Faculty Member, Department of XYZ',
+    name: 'Dr . Santosh Kumar Varanasi ',
+    role: 'Faculty Member, Department of Chemical engineering ',
     date: 'March 2025',
     thumbnail: null, // Replace with actual image path: '/interviews/photo1.jpg'
     summary:
@@ -107,8 +107,8 @@ A: [Interviewee response]`,
 const gallery = [
   {
     id: 1,
-    src: null, // Replace with: '/gallery/canal1.jpg'
-    caption: 'Indira Gandhi Canal near Jodhpur — Add your photo here',
+    src: 'src/pages/photos/meeting_sir.jpeg', 
+    caption: 'Meet with Santosh sir',
   },
   {
     id: 2,
