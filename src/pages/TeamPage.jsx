@@ -10,14 +10,14 @@ const teamMembers = [
     role: 'Research , Interviews and website coding ',
     branch: 'B.Tech, Department of Chemical Engineering',
     email: 'b22ch032@iitj.ac.in',
-    photo: './photos/profile_pic.jpeg', // Replace with: '/team/member1.jpg'
+    photo: '/team/profile_pic.jpeg', // Replace with: '/team/member1.jpg'
   },
   {
     name: 'Karan Pratap Singh Rathore',
     role: 'Interviews & Documentation',
     branch: 'B.Tech, Department of Chemical Engineering',
     email: 'b22ch013@iitj.ac.in',
-    photo: './photos/karan_pic.jpeg', // Replace with: '/team/member2.jpg'
+    photo: '/team/karan_pic.jpeg', // Replace with: '/team/member2.jpg'
   },
   {
     name: 'Devam Patel',
@@ -31,21 +31,21 @@ const teamMembers = [
     role: 'Field Research & Photography',
     branch: 'B.Tech, Department of Chemical Engineering ',
     email: 'b22ch010@iitj.ac.in',
-    photo: './photos/dhruv_pic.jpeg', // Replace with: '/team/member3.jpg'
+    photo: '/team/dhruv_pic.jpeg', // Replace with: '/team/member3.jpg'
   },
   {
     name: 'Avichal Sinha',
     role: 'Data Analysis & Writing',
     branch: 'B.Tech, Department of Chemical Engineering',
     email: 'b22ch004@iitj.ac.in',
-    photo: './photos/Avichal-Sinha-Image.jpeg',
+    photo: '/team/Avichal-Sinha-Image.jpeg',
   },
   {
     name: 'Ishaan Pandey',
     role: 'Literature Review & Citations',
     branch: 'B.Tech, Department of Civil and Infrastructure Engineering',
     email: 'b22ci017@iitj.ac.in',
-    photo: './photos/pandey_pic.jpeg', // Replace with: '/team/member6.jpg'
+    photo: '/team/pandey_pic.jpeg', // Replace with: '/team/member6.jpg'
   },
 ];
 
