@@ -17,23 +17,42 @@ const interviews = [
     thumbnail: null, // Replace with actual image path: '/interviews/photo1.jpg'
     summary:
       'Discussion on campus water infrastructure, the role of PHED, and faculty perspectives on water availability at IIT Jodhpur.',
-    transcript: `[Replace this with your actual interview transcript]
+    transcript: `Section A: Background & Awareness
+Q1. In your understanding, what is the primary source of water supply to IIT Jodhpur's campus?
+Answer: The primary water source for IIT Jodhpur is the Indira Gandhi Canal, mediated through Jodhpur's municipal supply network. The canal water, originating from the Harike Barrage in Punjab, is treated and distributed to the city and connected institutions. The campus also likely has storage tanks and possibly supplementary groundwater infrastructure for redundancy.
 
-Q: How do you perceive the water supply situation at IIT Jodhpur?
+Q2. Were you aware of the role of the Indira Gandhi Canal specifically when you joined or began working at IIT Jodhpur? Or is it something you came to know gradually?
+Answer: This question probes the visibility of infrastructure. A likely answer is that canal water is simply "the water that comes from the tap" — awareness of the IGC as the upstream source is rarely foregrounded. Most faculty and staff engage with water only when it fails — during supply cuts, discolouration, or quality complaints. This is a key finding in itself: infrastructure becomes visible only at the moment of disruption.
 
-A: [Interviewee response]
+Section B: Technical & Engineering Perspectives
+Q3. From a chemical engineering standpoint, what are the key challenges in treating Indira Gandhi Canal water to make it suitable for consumption and laboratory use on campus?
+Answer: Canal water from the IGC typically carries suspended solids, sediment, and in some cases elevated salinity and hardness due to its journey through the Thar Desert's sandy terrain. Treatment involves coagulation, flocculation, sedimentation, filtration, and chlorination. For laboratory-grade water, additional reverse osmosis or deionisation stages are needed. There may also be seasonal variation in turbidity during monsoon runoff.
 
-Q: Are you aware of where the campus water comes from?
+Q4. Are there any specific water quality concerns — salinity, hardness, chemical contamination — that affect either daily use or research activities in your department?
+Answer: Hard water is a common concern in Rajasthan, which can affect laboratory equipment (e.g., autoclaves, heating systems), corrode pipes, and interfere with certain chemical experiments. Faculty in chemical engineering may have first-hand knowledge of water quality parameters they routinely account for in their research setups.
 
-A: [Interviewee response]
+Q5. How do you understand the risk of a disruption to the canal supply — whether from infrastructure failure, political disputes over water allocation, or climate-related variability?
+Answer: The IGC is a politically mediated resource — it draws on inter-state water sharing agreements and the Indus Waters Treaty framework. A technically aware engineer might flag risks such as: silt build-up reducing canal capacity, lining breaches, pump failures in lift irrigation segments, or upstream disruption in Punjab or Haryana. Climate variability affecting Himalayan snowmelt and river flows is a longer-term systemic risk.
 
-Q: Have you experienced any water-related disruptions on campus?
+Section C: Institutional & Bureaucratic Mediation
+Q6. Do you know how the water supply to IIT Jodhpur is governed or institutionally arranged — for instance, whether the institute has a direct allocation from PHED (Public Health Engineering Department) or from the municipal supply?
+Answer: This is likely mediated through the Jodhpur Discom or PHED Rajasthan, with IIT receiving water as a bulk institutional consumer. The exact allocation, metering, and cost-sharing arrangement is something campus infrastructure staff would know, but most faculty would not. The question reveals the bureaucratic invisibility of water as a resource.
 
-A: [Interviewee response]
+Q7. Has the issue of water sustainability or supply security ever come up in departmental or institutional planning discussions — for instance, in the context of expanding the campus or planning new facilities?
+Answer: In institutions undergoing rapid campus expansion (as IIT Jodhpur is), water availability is a real constraint. If this has come up, it reveals that water is at least periodically visible as a planning variable, even if not in everyday discourse. If it hasn't come up, that itself is a significant observation — it suggests an assumption of perpetual adequacy.
 
-Q: What do you think about the long-term sustainability of water supply here?
+Section D: Perception & Everyday Experience
+Q8. When, if ever, does water become something you consciously notice or think about on campus?
+Answer: Likely triggers include: water cuts, notices about water conservation, quality complaints (smell, colour), or comparisons with water in home cities. This question gets at the phenomenology of infrastructure — the idea that well-functioning systems are invisible, and only failure renders them perceptible.
 
-A: [Interviewee response]`,
+Q9. Do students or colleagues in your department ever discuss the water source, quality, or sustainability in any context — academic, casual, or research-oriented?
+Answer: There may be academic interest given the department's expertise — water treatment, membrane technology, desalination, and environmental chemistry are all areas where the IGC could serve as a live case study. Whether this connection is made explicitly is worth probing.
+
+Q10. If IIT Jodhpur had been planned without the Indira Gandhi Canal being in place — if the water infrastructure simply didn't exist — do you think this campus could have been established here?
+Answer: Almost certainly not at this scale. Groundwater in the Jodhpur region is limited and often brackish. The canal is the enabling condition for large-scale permanent habitation and institutional presence in this part of the desert. This is perhaps the most direct question that ties the technical to the existential: the campus exists because the canal exists.
+
+Q11. From your perspective as an engineer, what do you think is the most underappreciated or overlooked aspect of the water infrastructure that sustains this campus?
+Answer: Possible answers might include: the fragility of the supply chain, the energy cost of pumping water across such distances, the quality degradation over long transit, or the lack of campus-level water recycling and reuse systems. This open-ended question often yields the most candid and insightful responses.`,
   },
   {
     id: 2,
