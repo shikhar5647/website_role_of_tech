@@ -131,8 +131,8 @@ const gallery = [
   },
   {
     id: 2,
-    src: null,
-    caption: 'IIT Jodhpur Campus Aerial View — Add your photo here',
+    src: '/gallery/campus_aerial.jpg',
+    caption: 'IIT Jodhpur Campus View from the Knowledge Tree',
   },
   {
     id: 3,
