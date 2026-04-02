@@ -54,7 +54,7 @@ const faculty = {
   designation: 'Course Instructor',
   department: 'School of Liberal Arts',
   institution: 'Indian Institute of Technology, Jodhpur',
-  photo: null, // Replace with actual photo path
+  photo: 'team/Rachel_Philip.jpeg', // Replace with actual photo path
 };
 
 export default function TeamPage() {
