@@ -80,7 +80,7 @@ A: [Interviewee response]`,
     id: 3,
     name: 'Interview Subject 3',
     role: 'Student, B.Tech / M.Tech',
-    date: 'March 2025',
+    date: 'March 2026',
     thumbnail: null,
     summary:
       'Student perspectives on daily water usage, awareness of the Indira Gandhi Canal, and visibility of water infrastructure.',
@@ -109,8 +109,8 @@ const gallery = [
   },
   {
     id: 2,
-    src: '/gallery/campus_aerial.jpg',
-    caption: 'IIT Jodhpur Campus View from the Knowledge Tree',
+    src: '/gallery/guard_interview.jpeg',
+    caption: 'Ishaan and Avichal interviewing the security personnel about water supply and contingency plans',
   },
   {
     id: 3,
