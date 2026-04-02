@@ -13,7 +13,7 @@ const interviews = [
     id: 1,
     name: 'Dr . Santosh Kumar Varanasi ',
     role: 'Faculty Member, Department of Chemical engineering ',
-    date: 'March 2025',
+    date: 'March 2026',
     thumbnail: null, // Replace with actual image path: '/interviews/photo1.jpg'
     summary:
       'Discussion on campus water infrastructure, the role of PHED, and faculty perspectives on water availability at IIT Jodhpur.',
@@ -56,9 +56,9 @@ Answer: Possible answers might include: the fragility of the supply chain, the e
   },
   {
     id: 2,
-    name: 'Interview Subject 2',
-    role: 'Infrastructure Engineer / Campus Planner',
-    date: 'March 2025',
+    name: 'Jitesh Jaat and Ravindra Singh',
+    role: 'Security Personnel, Campus Security',
+    date: 'March 2026',
     thumbnail: null,
     summary:
       'Insights into the planning of campus water systems, dependence on IGNP, and risk assessment for canal failure scenarios.',
@@ -97,29 +97,7 @@ A: [Interviewee response]
 Q: Were you aware of the Indira Gandhi Canal before this conversation?
 
 A: [Interviewee response]`,
-  },
-  {
-    id: 4,
-    name: 'Interview Subject 4',
-    role: 'Staff Member, Estate Section',
-    date: 'March 2025',
-    thumbnail: null,
-    summary:
-      'Behind-the-scenes management of water distribution, daily challenges, and interactions with PHED and external agencies.',
-    transcript: `[Replace this with your actual interview transcript]
-
-Q: Can you walk us through how water reaches the campus daily?
-
-A: [Interviewee response]
-
-Q: What are the main challenges in managing water supply on campus?
-
-A: [Interviewee response]
-
-Q: How do you coordinate with PHED and other agencies?
-
-A: [Interviewee response]`,
-  },
+  }, 
 ];
 
 // Placeholder gallery — replace with your actual photos
@@ -312,16 +290,6 @@ export default function InterviewsPage() {
               </div>
             </motion.div>
           ))}
-        </div>
-
-        <div className="gallery-instruction">
-          <p>
-            <strong>To add your photos:</strong> Place your images in the{' '}
-            <code>public/gallery/</code> folder and update the <code>gallery</code> array
-            in <code>src/pages/InterviewsPage.jsx</code> with the correct file paths and
-            captions. Similarly, update the <code>interviews</code> array with your actual
-            interview transcripts and subject details.
-          </p>
         </div>
       </section>
 
