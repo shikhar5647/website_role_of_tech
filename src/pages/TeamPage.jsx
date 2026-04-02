@@ -24,7 +24,7 @@ const teamMembers = [
     role: 'Web Development & Design',
     branch: 'B.Tech, Department of Chemical Engineering',
     email: 'b22ch021@iitj.ac.in',
-    photo: null,
+    photo: '/team/devam.jpeg', 
   },
   {
     name: 'Dhruv Kumar Singh',
