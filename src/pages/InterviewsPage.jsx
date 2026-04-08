@@ -114,8 +114,8 @@ const gallery = [
   },
   {
     id: 3,
-    src: '/gallery/IGC_desert.jpg',
-    caption: 'Water Storage Infrastructure on Campus',
+    src: '/gallery/laal_singh.jpeg',
+    caption: 'Karan and Devam interviewing Laal Singh, a long-time campus resident, about his experiences with water supply and quality on campus, he hails from Mandore',
   },
   {
     id: 4,

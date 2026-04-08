@@ -1,0 +1,1478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Indira Gandhi Canal — Interactive Explorer</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #030d1a;
+  --bg2: #071525;
+  --bg3: #0a1e35;
+  --border: rgba(56,165,255,0.15);
+  --blue: #38a5ff;
+  --blue-glow: rgba(56,165,255,0.25);
+  --teal: #00d4aa;
+  --gold: #f5c842;
+  --red: #ff6b6b;
+  --green: #4ade80;
+  --purple: #b48bfa;
+  --orange: #fb923c;
+  --jodhpur: #ff9d2e;
+  --text: #d0e8ff;
+  --text-dim: #5a7fa0;
+  --text-bright: #f0f8ff;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Outfit', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── HEADER ── */
+.header {
+  background: linear-gradient(180deg, #020a15 0%, transparent 100%);
+  padding: 18px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border);
+  position: relative;
+  z-index: 10;
+}
+
+.header-logo {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.logo-icon {
+  width: 44px; height: 44px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #0a3a6e, #1466b8);
+  border: 1px solid rgba(56,165,255,0.3);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 0 20px rgba(56,165,255,0.2);
+}
+
+.header-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 22px; font-weight: 800;
+  color: var(--text-bright);
+  letter-spacing: -0.5px;
+}
+
+.header-sub {
+  font-size: 12px; color: var(--text-dim);
+  font-weight: 300; letter-spacing: 0.5px;
+}
+
+.header-badge {
+  display: flex; align-items: center; gap: 8px;
+  background: rgba(255,157,46,0.1);
+  border: 1px solid rgba(255,157,46,0.3);
+  border-radius: 20px;
+  padding: 6px 14px;
+  font-size: 12px; font-weight: 600;
+  color: var(--jodhpur);
+  animation: badge-glow 2.5s ease-in-out infinite;
+}
+@keyframes badge-glow {
+  0%,100% { box-shadow: 0 0 8px rgba(255,157,46,0.2); }
+  50% { box-shadow: 0 0 18px rgba(255,157,46,0.5); }
+}
+
+/* ── MAIN LAYOUT ── */
+.main {
+  display: flex;
+  height: calc(100vh - 79px);
+}
+
+/* ── MAP ── */
+.map-container {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  background: radial-gradient(ellipse at 30% 40%, #051428 0%, #020a15 70%);
+}
+
+.map-svg {
+  width: 100%; height: 100%;
+}
+
+/* Map terrain texture */
+.map-container::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: 
+    radial-gradient(ellipse at 20% 80%, rgba(74,222,128,0.04) 0%, transparent 40%),
+    radial-gradient(ellipse at 80% 20%, rgba(56,165,255,0.04) 0%, transparent 40%);
+  pointer-events: none;
+}
+
+/* ── CANAL ANIMATIONS ── */
+@keyframes flow-main {
+  from { stroke-dashoffset: 600; }
+  to { stroke-dashoffset: 0; }
+}
+@keyframes flow-branch {
+  from { stroke-dashoffset: 300; }
+  to { stroke-dashoffset: 0; }
+}
+@keyframes flow-jodhpur {
+  from { stroke-dashoffset: 400; }
+  to { stroke-dashoffset: 0; }
+}
+@keyframes pulse-ring {
+  0% { r: 12; opacity: 0.6; }
+  100% { r: 24; opacity: 0; }
+}
+@keyframes marker-breathe {
+  0%,100% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+}
+
+.canal-main {
+  stroke-dasharray: 12 5;
+  animation: flow-main 4s linear infinite;
+}
+.canal-branch {
+  stroke-dasharray: 7 4;
+  animation: flow-branch 3s linear infinite;
+}
+.canal-jodhpur {
+  stroke-dasharray: 9 4;
+  animation: flow-jodhpur 3.5s linear infinite;
+}
+.canal-small {
+  stroke-dasharray: 4 5;
+  animation: flow-branch 2.5s linear infinite;
+}
+
+.pulse-ring {
+  animation: pulse-ring 1.8s ease-out infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.marker-group {
+  cursor: pointer;
+  transition: filter 0.2s;
+}
+.marker-group:hover {
+  filter: brightness(1.4) drop-shadow(0 0 8px currentColor);
+}
+.marker-group.active-marker {
+  filter: brightness(1.6) drop-shadow(0 0 12px currentColor);
+}
+
+/* Jodhpur highlight zone */
+.jodhpur-zone {
+  animation: zone-breathe 3s ease-in-out infinite;
+}
+@keyframes zone-breathe {
+  0%,100% { opacity: 0.25; }
+  50% { opacity: 0.45; }
+}
+
+/* ── TOOLTIP ── */
+.map-tooltip {
+  position: absolute;
+  background: rgba(3,13,26,0.95);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 12px;
+  color: var(--text-bright);
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: opacity 0.15s, transform 0.15s;
+  z-index: 100;
+  white-space: nowrap;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+}
+.map-tooltip.visible {
+  opacity: 1; transform: translateY(0);
+}
+.map-tooltip strong { color: var(--blue); display: block; margin-bottom: 2px; }
+
+/* ── SIDE PANEL ── */
+.side-panel {
+  width: 360px;
+  background: var(--bg2);
+  border-left: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+
+/* ── PANEL TABS ── */
+.panel-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+  flex-shrink: 0;
+}
+.tab-btn {
+  flex: 1;
+  padding: 10px 6px;
+  font-size: 11px;
+  font-weight: 500;
+  font-family: 'Outfit', sans-serif;
+  color: var(--text-dim);
+  background: none;
+  border: none;
+  cursor: pointer;
+  letter-spacing: 0.3px;
+  transition: color 0.2s, border-bottom 0.2s;
+  border-bottom: 2px solid transparent;
+}
+.tab-btn.active {
+  color: var(--blue);
+  border-bottom-color: var(--blue);
+}
+
+/* ── PANEL VIEWS ── */
+.panel-view { display: none; flex-direction: column; height: 100%; }
+.panel-view.active { display: flex; }
+
+/* ── DEFAULT STATE ── */
+.default-state {
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  height: 100%; padding: 32px 28px;
+  text-align: center; gap: 16px;
+}
+.default-pulse {
+  width: 72px; height: 72px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(56,165,255,0.15) 0%, transparent 70%);
+  border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  animation: default-pulse 2.5s ease-in-out infinite;
+}
+@keyframes default-pulse {
+  0%,100% { box-shadow: 0 0 0 0 var(--blue-glow); }
+  50% { box-shadow: 0 0 0 14px transparent; }
+}
+.default-state h3 {
+  font-family: 'Syne', sans-serif;
+  font-size: 18px; font-weight: 700;
+  color: var(--text-bright);
+}
+.default-state p { font-size: 13px; color: var(--text-dim); line-height: 1.6; }
+
+.quick-facts {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 8px; width: 100%;
+}
+.qf-item {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  border-radius: 8px; padding: 10px;
+  text-align: left;
+}
+.qf-val { font-size: 18px; font-weight: 600; color: var(--blue); line-height: 1; }
+.qf-label { font-size: 10px; color: var(--text-dim); margin-top: 3px; }
+
+/* ── LOCATION PANEL ── */
+.loc-panel { overflow-y: auto; }
+
+.loc-hero {
+  height: 170px; position: relative;
+  flex-shrink: 0; overflow: hidden;
+}
+.loc-hero svg { width: 100%; height: 100%; }
+
+.loc-close {
+  position: absolute; top: 10px; right: 10px;
+  width: 28px; height: 28px; border-radius: 50%;
+  background: rgba(3,13,26,0.8);
+  border: 1px solid var(--border);
+  color: var(--text); font-size: 14px;
+  cursor: pointer; display: flex;
+  align-items: center; justify-content: center;
+  transition: background 0.2s;
+}
+.loc-close:hover { background: rgba(56,165,255,0.2); }
+
+.loc-body { padding: 18px 20px 28px; }
+
+.loc-tag {
+  display: inline-block;
+  font-size: 10px; font-weight: 600;
+  padding: 3px 10px; border-radius: 20px;
+  text-transform: uppercase; letter-spacing: 0.8px;
+  margin-bottom: 10px;
+}
+
+.loc-name {
+  font-family: 'Syne', sans-serif;
+  font-size: 22px; font-weight: 800;
+  color: var(--text-bright); line-height: 1.1;
+  margin-bottom: 3px;
+}
+.loc-sub { font-size: 12px; color: var(--text-dim); margin-bottom: 14px; }
+.loc-desc { font-size: 13px; color: #8aaccc; line-height: 1.75; margin-bottom: 18px; }
+
+.stats-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 8px; margin-bottom: 18px;
+}
+.stat-card {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  border-radius: 10px; padding: 12px;
+}
+.stat-val { font-size: 19px; font-weight: 600; color: var(--blue); line-height: 1; }
+.stat-lbl { font-size: 10px; color: var(--text-dim); margin-top: 4px; line-height: 1.3; }
+
+/* IIT Jodhpur special card */
+.iit-card {
+  background: linear-gradient(135deg, rgba(255,157,46,0.08), rgba(255,157,46,0.03));
+  border: 1px solid rgba(255,157,46,0.3);
+  border-radius: 12px; padding: 16px;
+  margin-bottom: 18px;
+  position: relative; overflow: hidden;
+}
+.iit-card::before {
+  content: '🎓';
+  position: absolute; right: 12px; top: 10px;
+  font-size: 28px; opacity: 0.3;
+}
+.iit-card h4 {
+  font-family: 'Syne', sans-serif;
+  font-size: 14px; font-weight: 700;
+  color: var(--jodhpur); margin-bottom: 8px;
+}
+.iit-card p { font-size: 12px; color: #b8a070; line-height: 1.6; }
+
+/* Water flow diagram inside panel */
+.water-flow-mini {
+  background: rgba(5,20,40,0.8);
+  border: 1px solid var(--border);
+  border-radius: 10px; padding: 14px;
+  margin-bottom: 18px;
+}
+.water-flow-mini h4 {
+  font-size: 11px; font-weight: 600;
+  color: var(--text-dim); text-transform: uppercase;
+  letter-spacing: 0.6px; margin-bottom: 10px;
+}
+.flow-steps {
+  display: flex; align-items: center; gap: 4px; flex-wrap: wrap;
+}
+.flow-step {
+  font-size: 10px; font-weight: 500;
+  color: var(--text-bright);
+  background: rgba(56,165,255,0.1);
+  border: 1px solid rgba(56,165,255,0.2);
+  border-radius: 6px; padding: 4px 8px;
+  white-space: nowrap;
+}
+.flow-step.highlight {
+  background: rgba(255,157,46,0.15);
+  border-color: rgba(255,157,46,0.35);
+  color: var(--jodhpur);
+}
+.flow-arrow { color: var(--text-dim); font-size: 12px; }
+
+/* Links */
+.links-section h4 {
+  font-size: 11px; font-weight: 500;
+  color: var(--text-dim); text-transform: uppercase;
+  letter-spacing: 0.6px; margin-bottom: 10px;
+}
+.link-btn {
+  display: flex; align-items: center;
+  gap: 10px; padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.02);
+  color: #8aaccc; text-decoration: none;
+  font-size: 12px; margin-bottom: 7px;
+  cursor: pointer; transition: all 0.2s;
+}
+.link-btn:hover {
+  background: rgba(56,165,255,0.08);
+  border-color: rgba(56,165,255,0.3);
+  color: var(--text-bright);
+}
+.link-icon {
+  width: 28px; height: 28px; border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; flex-shrink: 0;
+}
+.link-btn span { flex: 1; }
+.link-arrow { font-size: 10px; opacity: 0.4; }
+
+/* ── TIMELINE TAB ── */
+.timeline-panel { overflow-y: auto; padding: 20px; }
+.timeline-panel h3 {
+  font-family: 'Syne', sans-serif;
+  font-size: 16px; font-weight: 700;
+  color: var(--text-bright); margin-bottom: 20px;
+}
+.timeline-item {
+  display: flex; gap: 14px; margin-bottom: 20px;
+  position: relative;
+}
+.timeline-item::before {
+  content: '';
+  position: absolute; left: 19px; top: 30px;
+  width: 2px; height: calc(100% + 20px);
+  background: linear-gradient(180deg, var(--blue-glow), transparent);
+}
+.timeline-item:last-child::before { display: none; }
+.tl-dot {
+  width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700;
+  background: var(--bg3); border: 2px solid var(--border);
+  color: var(--blue);
+}
+.tl-content { flex: 1; }
+.tl-year {
+  font-family: 'Syne', sans-serif;
+  font-size: 13px; font-weight: 700;
+  color: var(--blue); margin-bottom: 2px;
+}
+.tl-event { font-size: 13px; font-weight: 600; color: var(--text-bright); margin-bottom: 3px; }
+.tl-desc { font-size: 12px; color: var(--text-dim); line-height: 1.5; }
+.tl-special {
+  border: 1px solid rgba(255,157,46,0.3);
+  background: rgba(255,157,46,0.05);
+  border-radius: 8px; padding: 8px 10px;
+  margin-top: 6px;
+  font-size: 11px; color: #d4a06a; line-height: 1.5;
+}
+
+/* ── STATS TAB ── */
+.stats-panel { overflow-y: auto; padding: 20px; }
+.stats-panel h3 {
+  font-family: 'Syne', sans-serif;
+  font-size: 16px; font-weight: 700;
+  color: var(--text-bright); margin-bottom: 16px;
+}
+.big-stat {
+  background: var(--bg3);
+  border: 1px solid var(--border);
+  border-radius: 12px; padding: 16px;
+  margin-bottom: 10px;
+  display: flex; align-items: center; gap: 14px;
+}
+.big-stat-icon {
+  width: 44px; height: 44px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; flex-shrink: 0;
+}
+.big-stat-val {
+  font-family: 'Syne', sans-serif;
+  font-size: 22px; font-weight: 800;
+  color: var(--text-bright); line-height: 1;
+}
+.big-stat-lbl { font-size: 11px; color: var(--text-dim); margin-top: 3px; }
+
+.jodhpur-highlight-box {
+  background: linear-gradient(135deg, rgba(255,157,46,0.1), rgba(255,157,46,0.04));
+  border: 1px solid rgba(255,157,46,0.35);
+  border-radius: 12px; padding: 16px;
+  margin: 14px 0;
+}
+.jodhpur-highlight-box h4 {
+  font-family: 'Syne', sans-serif;
+  font-size: 14px; font-weight: 700;
+  color: var(--jodhpur); margin-bottom: 10px;
+  display: flex; align-items: center; gap: 8px;
+}
+.jodhpur-highlight-box .mini-stat {
+  display: flex; justify-content: space-between;
+  font-size: 12px; padding: 5px 0;
+  border-bottom: 1px solid rgba(255,157,46,0.1);
+  color: #c8a060;
+}
+.jodhpur-highlight-box .mini-stat:last-child { border-bottom: none; }
+.jodhpur-highlight-box .mini-stat span:first-child { color: #8a6840; }
+
+/* ── LEGEND ── */
+.map-legend {
+  position: absolute; bottom: 14px; left: 14px;
+  background: rgba(3,13,26,0.88);
+  border: 1px solid var(--border);
+  border-radius: 10px; padding: 12px 14px;
+  font-size: 11px; z-index: 10;
+}
+.leg-item {
+  display: flex; align-items: center;
+  gap: 8px; margin-bottom: 5px; color: var(--text-dim);
+}
+.leg-item:last-child { margin-bottom: 0; }
+.leg-line { width: 22px; height: 3px; border-radius: 2px; flex-shrink: 0; }
+
+/* ── HOVER TOOLTIP ── */
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-logo">
+    <div class="logo-icon">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+        <path d="M3 10 C6 6,10 6,12 10 C14 14,18 14,21 10" stroke="#38a5ff" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+        <path d="M3 15 C6 11,10 11,12 15 C14 19,18 19,21 15" stroke="#00d4aa" stroke-width="1.5" stroke-linecap="round" fill="none" opacity="0.6"/>
+      </svg>
+    </div>
+    <div>
+      <div class="header-title">Indira Gandhi Canal</div>
+      <div class="header-sub">649 km · Rajasthan · Interactive Explorer</div>
+    </div>
+  </div>
+  <div class="header-badge">
+    ⭐ IIT Jodhpur Story
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- MAP -->
+  <div class="map-container" id="mapContainer">
+    <svg class="map-svg" viewBox="0 0 680 600" xmlns="http://www.w3.org/2000/svg" id="mainSvg">
+      <defs>
+        <filter id="glow-blue">
+          <feGaussianBlur stdDeviation="3" result="blur"/>
+          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <filter id="glow-orange">
+          <feGaussianBlur stdDeviation="4" result="blur"/>
+          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <filter id="glow-soft">
+          <feGaussianBlur stdDeviation="6" result="blur"/>
+          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+        <radialGradient id="jodhpur-glow" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#ff9d2e" stop-opacity="0.4"/>
+          <stop offset="100%" stop-color="#ff9d2e" stop-opacity="0"/>
+        </radialGradient>
+        <radialGradient id="green-glow" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#4ade80" stop-opacity="0.15"/>
+          <stop offset="100%" stop-color="#4ade80" stop-opacity="0"/>
+        </radialGradient>
+        <linearGradient id="canal-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stop-color="#38a5ff"/>
+          <stop offset="100%" stop-color="#00d4aa"/>
+        </linearGradient>
+      </defs>
+
+      <!-- ═══ TERRAIN ═══ -->
+      <!-- Desert base gradient -->
+      <rect x="0" y="0" width="680" height="600" fill="#030d1a"/>
+      
+      <!-- Thar Desert sandy areas (bottom half) -->
+      <ellipse cx="380" cy="460" rx="260" ry="150" fill="#1a100a" opacity="0.6"/>
+      <ellipse cx="500" cy="520" rx="180" ry="100" fill="#1e1208" opacity="0.4"/>
+      
+      <!-- Punjab green area (top) -->
+      <ellipse cx="140" cy="60" rx="120" ry="70" fill="#0a1e0a" opacity="0.5"/>
+
+      <!-- Pakistan border line -->
+      <line x1="0" y1="0" x2="0" y2="600" stroke="none"/>
+      <path d="M 0,80 L 80,60 L 80,600" fill="none" stroke="#ff6b6b" stroke-width="1" stroke-dasharray="6,4" opacity="0.4"/>
+      <text x="22" y="140" font-size="9" fill="#ff6b6b" font-family="Outfit,sans-serif" opacity="0.5" transform="rotate(-90,22,140)">PAKISTAN →</text>
+
+      <!-- India-Pakistan reference -->
+      <text x="14" y="25" font-size="8" fill="#ff6b6b" font-family="Outfit,sans-serif" opacity="0.45">PAKISTAN</text>
+      <text x="200" y="25" font-size="8" fill="#5a7fa0" font-family="Outfit,sans-serif" opacity="0.6">PUNJAB</text>
+      <text x="380" y="25" font-size="9" fill="#5a7fa0" font-family="Outfit,sans-serif" opacity="0.7">R A J A S T H A N</text>
+      
+      <!-- Punjab-Rajasthan border -->
+      <line x1="80" y1="150" x2="680" y2="150" stroke="#5a7fa0" stroke-width="0.6" stroke-dasharray="5,4" opacity="0.35"/>
+      <text x="540" y="145" font-size="8" fill="#5a7fa0" font-family="Outfit,sans-serif" opacity="0.5">↑ Punjab</text>
+      <text x="540" y="160" font-size="8" fill="#5a7fa0" font-family="Outfit,sans-serif" opacity="0.5">↓ Rajasthan</text>
+
+      <!-- ═══ IRRIGATED ZONES ═══ -->
+      <ellipse cx="165" cy="215" rx="45" ry="28" fill="url(#green-glow)" class="jodhpur-zone"/>
+      <ellipse cx="240" cy="275" rx="35" ry="22" fill="url(#green-glow)" class="jodhpur-zone"/>
+      <ellipse cx="290" cy="330" rx="40" ry="25" fill="url(#green-glow)" class="jodhpur-zone"/>
+
+      <!-- Jodhpur glow zone (special) -->
+      <circle cx="530" cy="420" r="55" fill="url(#jodhpur-glow)" class="jodhpur-zone"/>
+
+      <!-- ═══ MAIN CANAL PATH ═══ -->
+      <!-- Shadow layer -->
+      <path d="M 145,72 L 185,100 L 215,148 L 248,192 L 278,242 L 308,285 L 330,325 L 348,372 L 360,415 L 370,460 L 378,500"
+        fill="none" stroke="#38a5ff" stroke-width="7" opacity="0.08"/>
+      <!-- Base layer -->  
+      <path d="M 145,72 L 185,100 L 215,148 L 248,192 L 278,242 L 308,285 L 330,325 L 348,372 L 360,415 L 370,460 L 378,500"
+        fill="none" stroke="#38a5ff" stroke-width="3.5" opacity="0.25"/>
+      <!-- Animated flow -->
+      <path d="M 145,72 L 185,100 L 215,148 L 248,192 L 278,242 L 308,285 L 330,325 L 348,372 L 360,415 L 370,460 L 378,500"
+        fill="none" stroke="url(#canal-grad)" stroke-width="2.5" class="canal-main" filter="url(#glow-blue)"/>
+
+      <!-- ═══ BRANCH: Sri Ganganagar ═══ -->
+      <path d="M 248,192 L 200,208 L 158,225" fill="none" stroke="#4ade80" stroke-width="2.5" opacity="0.2"/>
+      <path d="M 248,192 L 200,208 L 158,225" fill="none" stroke="#4ade80" stroke-width="1.5" class="canal-branch" style="animation-delay:0.4s"/>
+
+      <!-- ═══ BRANCH: Bikaner ═══ -->
+      <path d="M 330,325 L 400,316 L 468,312" fill="none" stroke="#f5c842" stroke-width="2.5" opacity="0.2"/>
+      <path d="M 330,325 L 400,316 L 468,312" fill="none" stroke="#f5c842" stroke-width="1.5" class="canal-branch" style="animation-delay:0.8s"/>
+
+      <!-- ═══ BRANCH: Kolayat ═══ -->
+      <path d="M 348,372 L 420,386 L 488,395" fill="none" stroke="#b48bfa" stroke-width="2" opacity="0.2"/>
+      <path d="M 348,372 L 420,386 L 488,395" fill="none" stroke="#b48bfa" stroke-width="1.2" class="canal-small" style="animation-delay:1.2s"/>
+
+      <!-- ═══ JODHPUR BRANCH (HERO) ═══ -->
+      <!-- Main feed to Jodhpur via IGNP -->
+      <path d="M 360,415 L 400,420 L 450,422 L 490,420 L 520,418 L 530,420"
+        fill="none" stroke="#ff9d2e" stroke-width="6" opacity="0.1"/>
+      <path d="M 360,415 L 400,420 L 450,422 L 490,420 L 520,418 L 530,420"
+        fill="none" stroke="#ff9d2e" stroke-width="3.5" opacity="0.3"/>
+      <path d="M 360,415 L 400,420 L 450,422 L 490,420 L 520,418 L 530,420"
+        fill="none" stroke="#ff9d2e" stroke-width="2" class="canal-jodhpur" filter="url(#glow-orange)"/>
+
+      <!-- Jodhpur city water distribution -->
+      <path d="M 530,420 L 540,430 L 545,445 L 540,460" fill="none" stroke="#ff9d2e" stroke-width="1.2" class="canal-small" style="animation-delay:0.3s" opacity="0.6"/>
+      <path d="M 530,420 L 548,415 L 558,420 L 555,435" fill="none" stroke="#ff9d2e" stroke-width="1" stroke-dasharray="3,3" opacity="0.4"/>
+      <path d="M 530,420 L 520,410 L 515,395" fill="none" stroke="#ff9d2e" stroke-width="1" stroke-dasharray="3,3" opacity="0.4"/>
+
+      <!-- IIT Jodhpur specific branch -->
+      <path d="M 548,415 L 560,408 L 572,404" fill="none" stroke="#fbbf24" stroke-width="1.5" class="canal-small" style="animation-delay:0.6s" opacity="0.7"/>
+
+      <!-- ═══ GAJNER BRANCH ═══ -->
+      <path d="M 360,415 L 432,428 L 502,438" fill="none" stroke="#4ade80" stroke-width="1.5" opacity="0.2"/>
+      <path d="M 360,415 L 432,428 L 502,438" fill="none" stroke="#4ade80" stroke-width="1" class="canal-small" style="animation-delay:0.6s"/>
+
+      <!-- ═══ DISTRIBUTARY LINES ═══ -->
+      <path d="M 278,242 L 235,262" fill="none" stroke="#38a5ff" stroke-width="0.8" stroke-dasharray="3,4" opacity="0.3"/>
+      <path d="M 308,285 L 262,300" fill="none" stroke="#38a5ff" stroke-width="0.8" stroke-dasharray="3,4" opacity="0.3"/>
+      <path d="M 348,372 L 302,388" fill="none" stroke="#38a5ff" stroke-width="0.8" stroke-dasharray="3,4" opacity="0.3"/>
+
+      <!-- ═══ WATER LABEL ON JODHPUR BRANCH ═══ -->
+      <text x="445" y="412" font-size="9" fill="#ff9d2e" font-family="Outfit,sans-serif" font-weight="600" opacity="0.8">Water to Jodhpur →</text>
+
+      <!-- ═══ MARKERS ═══ -->
+
+      <!-- 1: Harike Headworks -->
+      <g class="marker-group" onclick="showLocation('harike')" data-tip="Harike Headworks — Canal Origin" data-loc="harike">
+        <circle cx="145" cy="72" r="18" fill="#38a5ff" opacity="0" class="pulse-ring"/>
+        <circle cx="145" cy="72" r="18" fill="#38a5ff" opacity="0" class="pulse-ring" style="animation-delay:0.6s"/>
+        <circle cx="145" cy="72" r="10" fill="#071525" stroke="#38a5ff" stroke-width="2.5"/>
+        <text x="145" y="76" text-anchor="middle" font-size="8" fill="#38a5ff" font-family="Outfit,sans-serif" font-weight="700">H</text>
+        <text x="162" y="66" font-size="10" fill="#d0e8ff" font-family="Outfit,sans-serif">Harike</text>
+        <text x="162" y="78" font-size="8" fill="#5a7fa0" font-family="Outfit,sans-serif">Headworks</text>
+      </g>
+
+      <!-- 2: Masitanwali -->
+      <g class="marker-group" onclick="showLocation('masitanwali')" data-tip="Masitanwali — Punjab-Rajasthan Border" data-loc="masitanwali">
+        <circle cx="215" cy="148" r="15" fill="#4ade80" opacity="0" class="pulse-ring" style="animation-delay:0.4s"/>
+        <circle cx="215" cy="148" r="9" fill="#071525" stroke="#4ade80" stroke-width="2"/>
+        <text x="215" y="152" text-anchor="middle" font-size="8" fill="#4ade80" font-family="Outfit,sans-serif" font-weight="700">M</text>
+        <text x="228" y="143" font-size="10" fill="#d0e8ff" font-family="Outfit,sans-serif">Masitanwali</text>
+        <text x="228" y="155" font-size="8" fill="#5a7fa0" font-family="Outfit,sans-serif">Border crossing</text>
+      </g>
+
+      <!-- 3: Sri Ganganagar -->
+      <g class="marker-group" onclick="showLocation('ganganagar')" data-tip="Sri Ganganagar — First irrigated city" data-loc="ganganagar">
+        <circle cx="155" cy="225" r="15" fill="#f5c842" opacity="0" class="pulse-ring" style="animation-delay:0.8s"/>
+        <circle cx="155" cy="225" r="9" fill="#071525" stroke="#f5c842" stroke-width="2"/>
+        <text x="155" y="229" text-anchor="middle" font-size="7" fill="#f5c842" font-family="Outfit,sans-serif" font-weight="700">SG</text>
+        <text x="105" y="221" text-anchor="end" font-size="10" fill="#d0e8ff" font-family="Outfit,sans-serif">Sri Ganganagar</text>
+        <text x="105" y="233" text-anchor="end" font-size="8" fill="#5a7fa0" font-family="Outfit,sans-serif">Irrigation hub</text>
+      </g>
+
+      <!-- 4: Anupgarh -->
+      <g class="marker-group" onclick="showLocation('anupgarh')" data-tip="Anupgarh — Stage I Terminus" data-loc="anupgarh">
+        <circle cx="278" cy="242" r="15" fill="#ff6b6b" opacity="0" class="pulse-ring" style="animation-delay:1.0s"/>
+        <circle cx="278" cy="242" r="9" fill="#071525" stroke="#ff6b6b" stroke-width="2"/>
+        <text x="278" y="246" text-anchor="middle" font-size="7" fill="#ff6b6b" font-family="Outfit,sans-serif" font-weight="700">AN</text>
+        <text x="294" y="238" font-size="10" fill="#d0e8ff" font-family="Outfit,sans-serif">Anupgarh</text>
+        <text x="294" y="250" font-size="8" fill="#5a7fa0" font-family="Outfit,sans-serif">Stage I end</text>
+      </g>
+
+      <!-- 5: Bikaner -->
+      <g class="marker-group" onclick="showLocation('bikaner')" data-tip="Bikaner — Historic Fort City" data-loc="bikaner">
+        <circle cx="470" cy="312" r="16" fill="#f5c842" opacity="0" class="pulse-ring" style="animation-delay:1.3s"/>
+        <circle cx="470" cy="312" r="10" fill="#071525" stroke="#f5c842" stroke-width="2.5"/>
+        <text x="470" y="316" text-anchor="middle" font-size="7" fill="#f5c842" font-family="Outfit,sans-serif" font-weight="700">BKN</text>
+        <text x="470" y="298" text-anchor="middle" font-size="10" fill="#d0e8ff" font-family="Outfit,sans-serif">Bikaner</text>
+        <text x="470" y="332" text-anchor="middle" font-size="8" fill="#5a7fa0" font-family="Outfit,sans-serif">Desert city</text>
+      </g>
+
+      <!-- 6: Kolayat -->
+      <g class="marker-group" onclick="showLocation('kolayat')" data-tip="Kolayat — Sacred Lake & Temple" data-loc="kolayat">
+        <circle cx="490" cy="395" r="14" fill="#b48bfa" opacity="0" class="pulse-ring" style="animation-delay:1.6s"/>
+        <circle cx="490" cy="395" r="8" fill="#071525" stroke="#b48bfa" stroke-width="2"/>
+        <text x="490" y="399" text-anchor="middle" font-size="8" fill="#b48bfa" font-family="Outfit,sans-serif" font-weight="700">KL</text>
+        <text x="490" y="381" text-anchor="middle" font-size="10" fill="#d0e8ff" font-family="Outfit,sans-serif">Kolayat</text>
+        <text x="490" y="412" text-anchor="middle" font-size="8" fill="#5a7fa0" font-family="Outfit,sans-serif">Sacred lake</text>
+      </g>
+
+      <!-- ★ JODHPUR (HERO MARKER) ★ -->
+      <g class="marker-group" onclick="showLocation('jodhpur')" data-tip="Jodhpur — IIT Jodhpur & City Water Supply" data-loc="jodhpur" id="jodhpurMarker">
+        <!-- Extra glow rings for hero -->
+        <circle cx="530" cy="420" r="30" fill="#ff9d2e" opacity="0" class="pulse-ring" style="animation-delay:0s"/>
+        <circle cx="530" cy="420" r="30" fill="#ff9d2e" opacity="0" class="pulse-ring" style="animation-delay:0.7s"/>
+        <circle cx="530" cy="420" r="30" fill="#ff9d2e" opacity="0" class="pulse-ring" style="animation-delay:1.4s"/>
+        <!-- Outer ring -->
+        <circle cx="530" cy="420" r="18" fill="rgba(255,157,46,0.08)" stroke="rgba(255,157,46,0.4)" stroke-width="1.5"/>
+        <!-- Inner marker -->
+        <circle cx="530" cy="420" r="11" fill="#1a0a00" stroke="#ff9d2e" stroke-width="2.5" filter="url(#glow-orange)"/>
+        <text x="530" y="424" text-anchor="middle" font-size="8" fill="#ff9d2e" font-family="Outfit,sans-serif" font-weight="800">JDH</text>
+        <!-- Label with star -->
+        <text x="548" y="410" font-size="11" fill="#ff9d2e" font-family="Outfit,sans-serif" font-weight="700">Jodhpur</text>
+        <text x="548" y="423" font-size="9" fill="#b87030" font-family="Outfit,sans-serif">⭐ IIT Jodhpur</text>
+        <text x="548" y="435" font-size="8" fill="#7a5020" font-family="Outfit,sans-serif">City water supply</text>
+      </g>
+
+      <!-- 8: Gajner -->
+      <g class="marker-group" onclick="showLocation('gajner')" data-tip="Gajner Wildlife Sanctuary" data-loc="gajner">
+        <circle cx="503" cy="438" r="13" fill="#4ade80" opacity="0" class="pulse-ring" style="animation-delay:1.9s"/>
+        <circle cx="503" cy="438" r="8" fill="#071525" stroke="#4ade80" stroke-width="2"/>
+        <text x="503" y="442" text-anchor="middle" font-size="7" fill="#4ade80" font-family="Outfit,sans-serif" font-weight="700">GJ</text>
+        <text x="503" y="425" text-anchor="middle" font-size="10" fill="#d0e8ff" font-family="Outfit,sans-serif">Gajner</text>
+        <text x="503" y="455" text-anchor="middle" font-size="8" fill="#5a7fa0" font-family="Outfit,sans-serif">Wildlife</text>
+      </g>
+
+      <!-- 9: Mohangarh -->
+      <g class="marker-group" onclick="showLocation('mohangarh')" data-tip="Mohangarh — Stage II Terminal (649 km)" data-loc="mohangarh">
+        <circle cx="378" cy="500" r="15" fill="#ff6b6b" opacity="0" class="pulse-ring" style="animation-delay:2.2s"/>
+        <circle cx="378" cy="500" r="9" fill="#071525" stroke="#ff6b6b" stroke-width="2"/>
+        <text x="378" y="504" text-anchor="middle" font-size="7" fill="#ff6b6b" font-family="Outfit,sans-serif" font-weight="700">MG</text>
+        <text x="394" y="495" font-size="10" fill="#d0e8ff" font-family="Outfit,sans-serif">Mohangarh</text>
+        <text x="394" y="507" font-size="8" fill="#5a7fa0" font-family="Outfit,sans-serif">Terminal · 649 km</text>
+      </g>
+
+      <!-- ═══ COMPASS ═══ -->
+      <g transform="translate(642,52)">
+        <circle r="20" fill="rgba(3,13,26,0.75)" stroke="rgba(56,165,255,0.2)" stroke-width="1"/>
+        <text x="0" y="-24" text-anchor="middle" font-size="10" fill="#38a5ff" font-family="Syne,sans-serif" font-weight="700">N</text>
+        <text x="0" y="28" text-anchor="middle" font-size="8" fill="#3a5a7a" font-family="Outfit,sans-serif">S</text>
+        <text x="-26" y="4" text-anchor="middle" font-size="8" fill="#3a5a7a" font-family="Outfit,sans-serif">W</text>
+        <text x="26" y="4" text-anchor="middle" font-size="8" fill="#3a5a7a" font-family="Outfit,sans-serif">E</text>
+        <polygon points="0,-16 3,0 0,6 -3,0" fill="#38a5ff" opacity="0.9"/>
+        <polygon points="0,16 3,0 0,-6 -3,0" fill="#3a5a7a" opacity="0.5"/>
+      </g>
+
+      <!-- Scale bar -->
+      <g transform="translate(50,568)">
+        <line x1="0" y1="0" x2="110" y2="0" stroke="#4a6a8a" stroke-width="1.5"/>
+        <line x1="0" y1="-5" x2="0" y2="5" stroke="#4a6a8a" stroke-width="1.5"/>
+        <line x1="110" y1="-5" x2="110" y2="5" stroke="#4a6a8a" stroke-width="1.5"/>
+        <line x1="55" y1="-3" x2="55" y2="3" stroke="#4a6a8a" stroke-width="1"/>
+        <text x="55" y="-8" text-anchor="middle" font-size="9" fill="#4a6a8a" font-family="Outfit,sans-serif">≈ 150 km</text>
+      </g>
+    </svg>
+
+    <!-- Legend -->
+    <div class="map-legend">
+      <div class="leg-item"><div class="leg-line" style="background:#38a5ff"></div>Main canal</div>
+      <div class="leg-item"><div class="leg-line" style="background:#4ade80"></div>Branch canals</div>
+      <div class="leg-item"><div class="leg-line" style="background:#ff9d2e"></div>Jodhpur supply</div>
+      <div class="leg-item"><div class="leg-line" style="background:#f5c842"></div>Distributaries</div>
+      <div class="leg-item"><div class="leg-line" style="background:#ff6b6b; height:0; border-top:1px dashed #ff6b6b"></div>Intl. border</div>
+    </div>
+
+    <!-- Tooltip -->
+    <div class="map-tooltip" id="mapTooltip"></div>
+  </div>
+
+  <!-- SIDE PANEL -->
+  <div class="side-panel">
+    <div class="panel-tabs">
+      <button class="tab-btn active" onclick="switchTab('explore')">🗺 Explore</button>
+      <button class="tab-btn" onclick="switchTab('timeline')">📅 Timeline</button>
+      <button class="tab-btn" onclick="switchTab('stats')">📊 Stats</button>
+    </div>
+
+    <!-- EXPLORE TAB -->
+    <div class="panel-view active" id="tab-explore">
+      <!-- Default state -->
+      <div class="default-state" id="defaultState">
+        <div class="default-pulse">
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none">
+            <path d="M3 10C6 6 10 6 12 10C14 14 18 14 21 10" stroke="#38a5ff" stroke-width="2" stroke-linecap="round"/>
+            <path d="M3 15C6 11 10 11 12 15C14 19 18 19 21 15" stroke="#00d4aa" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/>
+          </svg>
+        </div>
+        <h3>Click a marker to explore</h3>
+        <p>Discover the 649 km journey of India's greatest canal — from Harike in Punjab to the heart of the Thar Desert.</p>
+        <div class="quick-facts">
+          <div class="qf-item"><div class="qf-val">649 km</div><div class="qf-label">Total length</div></div>
+          <div class="qf-item"><div class="qf-val">1.7 M ha</div><div class="qf-label">Area irrigated</div></div>
+          <div class="qf-item"><div class="qf-val">1958</div><div class="qf-label">Construction began</div></div>
+          <div class="qf-item"><div class="qf-val">~10 M</div><div class="qf-label">Beneficiaries</div></div>
+        </div>
+        <p style="font-size:11px;color:#3a6a8a;">⭐ Click the orange Jodhpur marker for the IIT Jodhpur story</p>
+      </div>
+
+      <!-- Location panels (all hidden by default) -->
+      <div class="loc-panel" id="loc-harike" style="display:none">
+        <div class="loc-hero" style="background:linear-gradient(135deg,#030d1a,#061828)">
+          <svg viewBox="0 0 360 170">
+            <rect width="360" height="170" fill="#050f1e"/>
+            <!-- Sky -->
+            <rect y="0" width="360" height="80" fill="#061422"/>
+            <!-- Water body -->
+            <ellipse cx="180" cy="100" rx="170" ry="40" fill="#0a2e52" opacity="0.9"/>
+            <path d="M10,95 Q90,80 180,90 Q270,100 350,85 L350,120 Q270,115 180,120 Q90,125 10,115Z" fill="#0d3a6e" opacity="0.8"/>
+            <!-- Animated water ripples -->
+            <ellipse cx="180" cy="100" rx="140" ry="20" fill="none" stroke="#38a5ff" stroke-width="1" opacity="0.3"/>
+            <ellipse cx="180" cy="100" rx="100" ry="14" fill="none" stroke="#38a5ff" stroke-width="0.8" opacity="0.2"/>
+            <!-- Barrage structure -->
+            <rect x="80" y="60" width="200" height="35" rx="3" fill="#0a1e38"/>
+            <rect x="80" y="60" width="200" height="8" rx="2" fill="#1a3a60"/>
+            <!-- Gates -->
+            <rect x="95" y="68" width="18" height="27" rx="1" fill="#0d2848"/>
+            <rect x="123" y="68" width="18" height="27" rx="1" fill="#0d2848"/>
+            <rect x="151" y="68" width="18" height="27" rx="1" fill="#0d2848"/>
+            <rect x="179" y="68" width="18" height="27" rx="1" fill="#0d2848"/>
+            <rect x="207" y="68" width="18" height="27" rx="1" fill="#0d2848"/>
+            <rect x="235" y="68" width="18" height="27" rx="1" fill="#0d2848"/>
+            <!-- Water spill -->
+            <path d="M90,95 Q95,105 100,110 Q105,115 110,110 L113,95" fill="#1a5090" opacity="0.6"/>
+            <path d="M200,95 Q205,108 210,112 Q215,115 220,110 L222,95" fill="#1a5090" opacity="0.5"/>
+            <!-- Label -->
+            <text x="180" y="148" text-anchor="middle" font-size="13" fill="#7ec8ff" font-family="Syne,sans-serif" font-weight="700">Harike Headworks</text>
+            <text x="180" y="163" text-anchor="middle" font-size="9" fill="#4a7aaa" font-family="Outfit,sans-serif">Origin of the Indira Gandhi Canal · Punjab</text>
+          </svg>
+          <button class="loc-close" onclick="closePanel()">✕</button>
+        </div>
+        <div class="loc-body">
+          <span class="loc-tag" style="background:rgba(56,165,255,0.12);color:#38a5ff;">Origin Point</span>
+          <div class="loc-name">Harike Headworks</div>
+          <div class="loc-sub">Ferozepur district, Punjab · Beas–Sutlej confluence</div>
+          <p class="loc-desc">The birthplace of the Indira Gandhi Canal — where the Beas and Sutlej rivers merge to form one of India's most audacious engineering projects. A massive barrage here lifts water and channels it on a 649 km journey south-west into the Thar Desert. Everything that powers Rajasthan's green revolution begins at this single point.</p>
+          <div class="stats-grid">
+            <div class="stat-card"><div class="stat-val">1952</div><div class="stat-lbl">Barrage built</div></div>
+            <div class="stat-card"><div class="stat-val">649 km</div><div class="stat-lbl">Canal stretches south</div></div>
+            <div class="stat-card"><div class="stat-val">Beas + Sutlej</div><div class="stat-lbl">River sources</div></div>
+            <div class="stat-card"><div class="stat-val">18,500 cusecs</div><div class="stat-lbl">Design discharge</div></div>
+          </div>
+          <div class="links-section">
+            <h4>Learn More</h4>
+            <a class="link-btn" href="https://en.wikipedia.org/wiki/Indira_Gandhi_Canal" target="_blank"><span class="link-icon" style="background:rgba(56,165,255,0.1)">📖</span><span>Wikipedia — Indira Gandhi Canal</span><span class="link-arrow">↗</span></a>
+            <a class="link-btn" href="https://www.youtube.com/results?search_query=Harike+Headworks+Indira+Gandhi+Canal" target="_blank"><span class="link-icon" style="background:rgba(255,80,80,0.1)">▶</span><span>YouTube — Harike Headworks</span><span class="link-arrow">↗</span></a>
+            <a class="link-btn" href="https://maps.google.com/?q=Harike+Headworks+Punjab" target="_blank"><span class="link-icon" style="background:rgba(74,222,128,0.1)">📍</span><span>View on Google Maps</span><span class="link-arrow">↗</span></a>
+          </div>
+        </div>
+      </div>
+
+      <div class="loc-panel" id="loc-masitanwali" style="display:none">
+        <div class="loc-hero" style="background:linear-gradient(135deg,#030d1a,#0a1e10)">
+          <svg viewBox="0 0 360 170">
+            <rect width="360" height="170" fill="#060e08"/>
+            <!-- Split terrain: green Punjab / desert Rajasthan -->
+            <rect x="0" y="0" width="180" height="170" fill="#0a1e0a" opacity="0.7"/>
+            <rect x="180" y="0" width="180" height="170" fill="#1a1008" opacity="0.7"/>
+            <!-- Border line -->
+            <line x1="180" y1="0" x2="180" y2="170" stroke="#5a7fa0" stroke-width="1.5" stroke-dasharray="6,3" opacity="0.6"/>
+            <text x="95" y="20" text-anchor="middle" font-size="9" fill="#4ade80" font-family="Outfit,sans-serif" opacity="0.6">PUNJAB</text>
+            <text x="265" y="20" text-anchor="middle" font-size="9" fill="#f5c842" font-family="Outfit,sans-serif" opacity="0.6">RAJASTHAN</text>
+            <!-- Canal path crossing border -->
+            <path d="M50,90 L180,90 L310,90" fill="none" stroke="#38a5ff" stroke-width="5" opacity="0.2"/>
+            <path d="M50,90 L310,90" fill="none" stroke="#38a5ff" stroke-width="2.5" stroke-dasharray="10,5" opacity="0.7"/>
+            <!-- Water on canal -->
+            <path d="M50,85 L310,85 L310,95 L50,95Z" fill="#0d3060" opacity="0.5"/>
+            <text x="180" y="148" text-anchor="middle" font-size="13" fill="#7ec8ff" font-family="Syne,sans-serif" font-weight="700">Masitanwali</text>
+            <text x="180" y="163" text-anchor="middle" font-size="9" fill="#4a7aaa" font-family="Outfit,sans-serif">Punjab–Rajasthan Border Crossing</text>
+          </svg>
+          <button class="loc-close" onclick="closePanel()">✕</button>
+        </div>
+        <div class="loc-body">
+          <span class="loc-tag" style="background:rgba(74,222,128,0.12);color:#4ade80;">State Border</span>
+          <div class="loc-name">Masitanwali</div>
+          <div class="loc-sub">Fazilka district, Punjab → Sriganganagar, Rajasthan</div>
+          <p class="loc-desc">The invisible but symbolic gateway — where the canal crosses from fertile Punjab into Rajasthan's arid landscape. At this crossing, the character of the land transforms dramatically: lush green farmland gives way to semi-arid scrub that the canal will eventually turn into productive agricultural land. Engineering meets political geography here.</p>
+          <div class="stats-grid">
+            <div class="stat-card"><div class="stat-val">~200 km</div><div class="stat-lbl">From Harike</div></div>
+            <div class="stat-card"><div class="stat-val">2 States</div><div class="stat-lbl">Canal crosses</div></div>
+            <div class="stat-card"><div class="stat-val">Feeder</div><div class="stat-lbl">Canal type here</div></div>
+            <div class="stat-card"><div class="stat-val">1958</div><div class="stat-lbl">Construction start</div></div>
+          </div>
+          <div class="links-section"><h4>Learn More</h4>
+            <a class="link-btn" href="https://en.wikipedia.org/wiki/Indira_Gandhi_Canal" target="_blank"><span class="link-icon" style="background:rgba(56,165,255,0.1)">📖</span><span>Wikipedia — Canal route</span><span class="link-arrow">↗</span></a>
+            <a class="link-btn" href="https://maps.google.com/?q=Masitanwali+Punjab" target="_blank"><span class="link-icon" style="background:rgba(74,222,128,0.1)">📍</span><span>Google Maps</span><span class="link-arrow">↗</span></a>
+          </div>
+        </div>
+      </div>
+
+      <div class="loc-panel" id="loc-ganganagar" style="display:none">
+        <div class="loc-hero" style="background:linear-gradient(135deg,#030d1a,#0a1a08)">
+          <svg viewBox="0 0 360 170">
+            <rect width="360" height="170" fill="#060e06"/>
+            <rect y="80" width="360" height="90" fill="#0a1e0a" opacity="0.9"/>
+            <!-- Fields -->
+            <rect x="20" y="90" width="70" height="50" fill="#0f2e0f" rx="2"/>
+            <rect x="100" y="85" width="70" height="55" fill="#122e10" rx="2"/>
+            <rect x="180" y="90" width="70" height="50" fill="#0f2e0f" rx="2"/>
+            <rect x="260" y="85" width="75" height="55" fill="#143010" rx="2"/>
+            <!-- Field lines -->
+            <line x1="55" y1="90" x2="55" y2="140" stroke="#1a4a1a" stroke-width="0.5"/>
+            <line x1="30" y1="115" x2="88" y2="115" stroke="#1a4a1a" stroke-width="0.5"/>
+            <!-- Canal through fields -->
+            <path d="M0,82 L360,82" fill="none" stroke="#38a5ff" stroke-width="3" opacity="0.6"/>
+            <path d="M0,78 L360,78" fill="none" stroke="#38a5ff" stroke-width="1.5" stroke-dasharray="8,4" opacity="0.9"/>
+            <!-- City silhouette -->
+            <rect x="140" y="40" width="80" height="38" fill="#0e1e10" rx="2"/>
+            <rect x="155" y="28" width="20" height="15" fill="#0e2010" rx="1"/>
+            <rect x="185" y="33" width="15" height="10" fill="#0e1e10" rx="1"/>
+            <text x="180" y="148" text-anchor="middle" font-size="13" fill="#aef5a0" font-family="Syne,sans-serif" font-weight="700">Sri Ganganagar</text>
+            <text x="180" y="163" text-anchor="middle" font-size="9" fill="#4a7a4a" font-family="Outfit,sans-serif">India's first canal-irrigated city in Rajasthan</text>
+          </svg>
+          <button class="loc-close" onclick="closePanel()">✕</button>
+        </div>
+        <div class="loc-body">
+          <span class="loc-tag" style="background:rgba(245,200,66,0.12);color:#f5c842;">Irrigation Hub</span>
+          <div class="loc-name">Sri Ganganagar</div>
+          <div class="loc-sub">Sri Ganganagar district · Rajasthan's food basket</div>
+          <p class="loc-desc">The first city in Rajasthan to benefit from canal irrigation — and perhaps the most dramatic transformation. What was once semi-desert now produces wheat, cotton, mustard, and sugarcane. Sri Ganganagar became the proof-of-concept that turned India's greatest desert into an agricultural powerhouse. It is today one of Rajasthan's most prosperous cities.</p>
+          <div class="stats-grid">
+            <div class="stat-card"><div class="stat-val">Wheat</div><div class="stat-lbl">Primary crop</div></div>
+            <div class="stat-card"><div class="stat-val">1.3 M+</div><div class="stat-lbl">District population</div></div>
+            <div class="stat-card"><div class="stat-val">1955</div><div class="stat-lbl">First water arrived</div></div>
+            <div class="stat-card"><div class="stat-val">#1</div><div class="stat-lbl">Rajasthan wheat yield</div></div>
+          </div>
+          <div class="links-section"><h4>Learn More</h4>
+            <a class="link-btn" href="https://en.wikipedia.org/wiki/Sri_Ganganagar" target="_blank"><span class="link-icon" style="background:rgba(56,165,255,0.1)">📖</span><span>Wikipedia — Sri Ganganagar</span><span class="link-arrow">↗</span></a>
+            <a class="link-btn" href="https://www.youtube.com/results?search_query=Sri+Ganganagar+Rajasthan+canal+irrigation" target="_blank"><span class="link-icon" style="background:rgba(255,80,80,0.1)">▶</span><span>YouTube — Farming revolution</span><span class="link-arrow">↗</span></a>
+            <a class="link-btn" href="https://maps.google.com/?q=Sri+Ganganagar+Rajasthan" target="_blank"><span class="link-icon" style="background:rgba(74,222,128,0.1)">📍</span><span>Google Maps</span><span class="link-arrow">↗</span></a>
+          </div>
+        </div>
+      </div>
+
+      <div class="loc-panel" id="loc-anupgarh" style="display:none">
+        <div class="loc-hero" style="background:linear-gradient(135deg,#150505,#200a0a)">
+          <svg viewBox="0 0 360 170">
+            <rect width="360" height="170" fill="#100505"/>
+            <rect y="90" width="360" height="80" fill="#1a0a05" opacity="0.9"/>
+            <!-- Fence/border line -->
+            <line x1="0" y1="55" x2="360" y2="55" stroke="#ff6b6b" stroke-width="2" stroke-dasharray="8,4" opacity="0.5"/>
+            <text x="320" y="48" font-size="8" fill="#ff6b6b" font-family="Outfit,sans-serif" opacity="0.6">Pakistan →</text>
+            <!-- Canal ending -->
+            <path d="M0,90 L200,90" fill="none" stroke="#38a5ff" stroke-width="3" opacity="0.6"/>
+            <circle cx="200" cy="90" r="10" fill="#0d2848" stroke="#38a5ff" stroke-width="2"/>
+            <text x="200" y="94" text-anchor="middle" font-size="7" fill="#38a5ff" font-family="Outfit,sans-serif" font-weight="700">END</text>
+            <text x="180" y="148" text-anchor="middle" font-size="13" fill="#ff9090" font-family="Syne,sans-serif" font-weight="700">Anupgarh</text>
+            <text x="180" y="163" text-anchor="middle" font-size="9" fill="#8a4a4a" font-family="Outfit,sans-serif">Stage I Terminus · Near Pakistan border</text>
+          </svg>
+          <button class="loc-close" onclick="closePanel()">✕</button>
+        </div>
+        <div class="loc-body">
+          <span class="loc-tag" style="background:rgba(255,107,107,0.12);color:#ff6b6b;">Stage I End</span>
+          <div class="loc-name">Anupgarh</div>
+          <div class="loc-sub">Sri Ganganagar district · Near Pakistan border</div>
+          <p class="loc-desc">The end of Stage I, completed in 1963 — marking the first phase of the great canal's journey. Anupgarh sits tantalizingly close to the Pakistan border. Stage I alone transformed hundreds of thousands of hectares of wasteland into productive farmland, validating the entire project and paving the way for the far more ambitious Stage II.</p>
+          <div class="stats-grid">
+            <div class="stat-card"><div class="stat-val">189 km</div><div class="stat-lbl">Stage I length</div></div>
+            <div class="stat-card"><div class="stat-val">1963</div><div class="stat-lbl">Stage I completed</div></div>
+            <div class="stat-card"><div class="stat-val">~5 km</div><div class="stat-lbl">From Pakistan</div></div>
+            <div class="stat-card"><div class="stat-val">0.55 M ha</div><div class="stat-lbl">Stage I irrigation</div></div>
+          </div>
+          <div class="links-section"><h4>Learn More</h4>
+            <a class="link-btn" href="https://en.wikipedia.org/wiki/Anupgarh" target="_blank"><span class="link-icon" style="background:rgba(56,165,255,0.1)">📖</span><span>Wikipedia — Anupgarh</span><span class="link-arrow">↗</span></a>
+            <a class="link-btn" href="https://maps.google.com/?q=Anupgarh+Rajasthan" target="_blank"><span class="link-icon" style="background:rgba(74,222,128,0.1)">📍</span><span>Google Maps</span><span class="link-arrow">↗</span></a>
+          </div>
+        </div>
+      </div>
+
+      <div class="loc-panel" id="loc-bikaner" style="display:none">
+        <div class="loc-hero" style="background:linear-gradient(135deg,#100a00,#1a1000)">
+          <svg viewBox="0 0 360 170">
+            <rect width="360" height="170" fill="#0e0800"/>
+            <rect y="100" width="360" height="70" fill="#1a1008" opacity="0.9"/>
+            <!-- Fort silhouette -->
+            <rect x="80" y="30" width="200" height="80" fill="#1a1000" rx="2"/>
+            <rect x="80" y="22" width="200" height="12" fill="#221500" rx="1"/>
+            <!-- Battlements -->
+            <rect x="80" y="14" width="14" height="10" fill="#221500" rx="1"/>
+            <rect x="104" y="14" width="14" height="10" fill="#221500" rx="1"/>
+            <rect x="128" y="14" width="14" height="10" fill="#221500" rx="1"/>
+            <rect x="152" y="14" width="14" height="10" fill="#221500" rx="1"/>
+            <rect x="176" y="14" width="14" height="10" fill="#221500" rx="1"/>
+            <rect x="200" y="14" width="14" height="10" fill="#221500" rx="1"/>
+            <rect x="224" y="14" width="14" height="10" fill="#221500" rx="1"/>
+            <rect x="248" y="14" width="14" height="10" fill="#221500" rx="1"/>
+            <rect x="266" y="14" width="14" height="10" fill="#221500" rx="1"/>
+            <!-- Gate -->
+            <path d="M165,110 L165,70 Q180,55 195,70 L195,110Z" fill="#0e0a00"/>
+            <!-- Canal reach -->
+            <path d="M0,110 L360,110" fill="none" stroke="#f5c842" stroke-width="2" stroke-dasharray="10,6" opacity="0.4"/>
+            <text x="180" y="148" text-anchor="middle" font-size="13" fill="#f5d890" font-family="Syne,sans-serif" font-weight="700">Bikaner</text>
+            <text x="180" y="163" text-anchor="middle" font-size="9" fill="#8a7030" font-family="Outfit,sans-serif">Historic desert fort city · Camel country</text>
+          </svg>
+          <button class="loc-close" onclick="closePanel()">✕</button>
+        </div>
+        <div class="loc-body">
+          <span class="loc-tag" style="background:rgba(245,200,66,0.12);color:#f5c842;">Historic City</span>
+          <div class="loc-name">Bikaner</div>
+          <div class="loc-sub">Bikaner district · Thar Desert fort city</div>
+          <p class="loc-desc">The ancient camel trading city that the Indira Gandhi Canal transformed. Water from the canal brought agriculture and industry to a city that for centuries survived on the back of camel caravans. The famous Junagarh Fort now overlooks green farmland where once there was only sand. Bikaner is the cultural capital of the canal's impact zone.</p>
+          <div class="stats-grid">
+            <div class="stat-card"><div class="stat-val">1488</div><div class="stat-lbl">City founded</div></div>
+            <div class="stat-card"><div class="stat-val">6.5 lakh+</div><div class="stat-lbl">City population</div></div>
+            <div class="stat-card"><div class="stat-val">Junagarh</div><div class="stat-lbl">Famous fort</div></div>
+            <div class="stat-card"><div class="stat-val">Camel milk</div><div class="stat-lbl">Unique economy</div></div>
+          </div>
+          <div class="links-section"><h4>Learn More</h4>
+            <a class="link-btn" href="https://en.wikipedia.org/wiki/Bikaner" target="_blank"><span class="link-icon" style="background:rgba(56,165,255,0.1)">📖</span><span>Wikipedia — Bikaner</span><span class="link-arrow">↗</span></a>
+            <a class="link-btn" href="https://www.youtube.com/results?search_query=Bikaner+Junagarh+fort+Rajasthan" target="_blank"><span class="link-icon" style="background:rgba(255,80,80,0.1)">▶</span><span>YouTube — Bikaner city tour</span><span class="link-arrow">↗</span></a>
+            <a class="link-btn" href="https://maps.google.com/?q=Bikaner+Rajasthan" target="_blank"><span class="link-icon" style="background:rgba(74,222,128,0.1)">📍</span><span>Google Maps</span><span class="link-arrow">↗</span></a>
+          </div>
+        </div>
+      </div>
+
+      <div class="loc-panel" id="loc-kolayat" style="display:none">
+        <div class="loc-hero" style="background:linear-gradient(135deg,#0a0520,#150830)">
+          <svg viewBox="0 0 360 170">
+            <rect width="360" height="170" fill="#080415"/>
+            <!-- Sacred lake -->
+            <ellipse cx="180" cy="110" rx="140" ry="40" fill="#0a1840" opacity="0.9"/>
+            <ellipse cx="180" cy="110" rx="110" ry="30" fill="#0d2060" opacity="0.8"/>
+            <ellipse cx="180" cy="110" rx="80" ry="22" fill="#102880" opacity="0.5"/>
+            <!-- Temple spires -->
+            <polygon points="120,80 126,45 132,80" fill="#2a1a5a"/>
+            <polygon points="168,80 174,35 180,80" fill="#3a2070"/>
+            <polygon points="216,80 222,45 228,80" fill="#2a1a5a"/>
+            <!-- Lamp lights -->
+            <circle cx="126" cy="80" r="3" fill="#f5c842" opacity="0.9"/>
+            <circle cx="174" cy="80" r="4" fill="#f5c842" opacity="1"/>
+            <circle cx="222" cy="80" r="3" fill="#f5c842" opacity="0.9"/>
+            <!-- Ghat steps -->
+            <rect x="140" y="80" width="80" height="6" fill="#1a1040" rx="1"/>
+            <rect x="145" y="86" width="70" height="6" fill="#150e38" rx="1"/>
+            <text x="180" y="153" text-anchor="middle" font-size="13" fill="#c090ff" font-family="Syne,sans-serif" font-weight="700">Kolayat</text>
+            <text x="180" y="166" text-anchor="middle" font-size="9" fill="#7050a0" font-family="Outfit,sans-serif">Sacred lake · 5,000 years of pilgrimage</text>
+          </svg>
+          <button class="loc-close" onclick="closePanel()">✕</button>
+        </div>
+        <div class="loc-body">
+          <span class="loc-tag" style="background:rgba(180,139,250,0.12);color:#b48bfa;">Sacred Site</span>
+          <div class="loc-name">Kolayat</div>
+          <div class="loc-sub">Bikaner district · Ancient pilgrimage town</div>
+          <p class="loc-desc">A divine oasis in the Thar Desert — a natural lake ringed by 52 ghats and ancient temples dedicated to sage Kapil Muni. The canal's recharged water table has helped preserve this 5,000-year-old sacred site. The Kartik Purnima fair draws over 100,000 pilgrims annually, making it one of Rajasthan's most important religious gatherings.</p>
+          <div class="stats-grid">
+            <div class="stat-card"><div class="stat-val">5,000+</div><div class="stat-lbl">Years of history</div></div>
+            <div class="stat-card"><div class="stat-val">52</div><div class="stat-lbl">Sacred ghats</div></div>
+            <div class="stat-card"><div class="stat-val">1 lakh+</div><div class="stat-lbl">Annual pilgrims</div></div>
+            <div class="stat-card"><div class="stat-val">Kapil Muni</div><div class="stat-lbl">Patron sage</div></div>
+          </div>
+          <div class="links-section"><h4>Learn More</h4>
+            <a class="link-btn" href="https://en.wikipedia.org/wiki/Kolayat" target="_blank"><span class="link-icon" style="background:rgba(56,165,255,0.1)">📖</span><span>Wikipedia — Kolayat</span><span class="link-arrow">↗</span></a>
+            <a class="link-btn" href="https://www.youtube.com/results?search_query=Kolayat+lake+temple+Rajasthan" target="_blank"><span class="link-icon" style="background:rgba(255,80,80,0.1)">▶</span><span>YouTube — Kolayat pilgrimage</span><span class="link-arrow">↗</span></a>
+            <a class="link-btn" href="https://maps.google.com/?q=Kolayat+Bikaner+Rajasthan" target="_blank"><span class="link-icon" style="background:rgba(74,222,128,0.1)">📍</span><span>Google Maps</span><span class="link-arrow">↗</span></a>
+          </div>
+        </div>
+      </div>
+
+      <!-- ★★★ JODHPUR / IIT JODHPUR (HERO) ★★★ -->
+      <div class="loc-panel" id="loc-jodhpur" style="display:none">
+        <div class="loc-hero" style="background:linear-gradient(135deg,#120800,#1e1200)">
+          <svg viewBox="0 0 360 170">
+            <rect width="360" height="170" fill="#100800"/>
+            <!-- Desert sky gradient -->
+            <rect y="0" width="360" height="90" fill="#130900"/>
+            <!-- Desert landscape -->
+            <path d="M0,110 Q80,90 160,105 Q240,120 320,100 L360,105 L360,170 L0,170Z" fill="#1e1008" opacity="0.9"/>
+            <!-- Canal arriving from left -->
+            <path d="M0,95 Q60,92 120,90 Q160,89 200,90" fill="none" stroke="#ff9d2e" stroke-width="4" opacity="0.25"/>
+            <path d="M0,95 Q60,92 120,90 Q160,89 200,90" fill="none" stroke="#ff9d2e" stroke-width="2.5" stroke-dasharray="10,5" opacity="0.8"/>
+            <!-- Mehrangarh fort silhouette (iconic Jodhpur) -->
+            <rect x="170" y="30" width="120" height="60" fill="#1a0e05" rx="2"/>
+            <rect x="165" y="22" width="132" height="12" fill="#221205"/>
+            <rect x="165" y="14" width="12" height="10" fill="#221205"/>
+            <rect x="186" y="14" width="12" height="10" fill="#221205"/>
+            <rect x="207" y="14" width="12" height="10" fill="#221205"/>
+            <rect x="228" y="14" width="12" height="10" fill="#221205"/>
+            <rect x="249" y="14" width="12" height="10" fill="#221205"/>
+            <rect x="270" y="14" width="12" height="10" fill="#221205"/>
+            <!-- IIT Jodhpur building (modern) -->
+            <rect x="30" y="50" width="110" height="55" fill="#151008" rx="3"/>
+            <rect x="40" y="40" width="90" height="14" fill="#1a1408" rx="2"/>
+            <!-- Windows (modern pattern) -->
+            <rect x="40" y="55" width="12" height="10" fill="#0a1828" rx="1"/>
+            <rect x="58" y="55" width="12" height="10" fill="#0a1828" rx="1"/>
+            <rect x="76" y="55" width="12" height="10" fill="#0a1828" rx="1"/>
+            <rect x="94" y="55" width="12" height="10" fill="#0a1828" rx="1"/>
+            <rect x="112" y="55" width="12" height="10" fill="#0a1828" rx="1"/>
+            <rect x="40" y="72" width="12" height="10" fill="#0a1828" rx="1"/>
+            <rect x="58" y="72" width="12" height="10" fill="#0a1828" rx="1"/>
+            <rect x="76" y="72" width="12" height="10" fill="#0a1828" rx="1"/>
+            <rect x="94" y="72" width="12" height="10" fill="#0a1828" rx="1"/>
+            <rect x="112" y="72" width="12" height="10" fill="#0a1828" rx="1"/>
+            <!-- Water pipe / supply line to IIT -->
+            <path d="M200,90 L90,90 L90,105" fill="none" stroke="#ff9d2e" stroke-width="1.5" stroke-dasharray="5,3" opacity="0.6"/>
+            <!-- Star label for IIT -->
+            <text x="85" y="37" text-anchor="middle" font-size="8" fill="#ff9d2e" font-family="Outfit,sans-serif" font-weight="600">IIT Jodhpur</text>
+            <!-- Labels -->
+            <text x="180" y="148" text-anchor="middle" font-size="13" fill="#ffb060" font-family="Syne,sans-serif" font-weight="800">Jodhpur City</text>
+            <text x="180" y="163" text-anchor="middle" font-size="9" fill="#a86030" font-family="Outfit,sans-serif">Canal water powers IIT Jodhpur &amp; 1.5 M residents</text>
+          </svg>
+          <button class="loc-close" onclick="closePanel()">✕</button>
+        </div>
+        <div class="loc-body">
+          <span class="loc-tag" style="background:rgba(255,157,46,0.15);color:#ff9d2e;">⭐ Featured Story</span>
+          <div class="loc-name">Jodhpur & IIT Jodhpur</div>
+          <div class="loc-sub">Jodhpur district · 1.5 million people · India's Sun City</div>
+          <p class="loc-desc">The Blue City of Rajasthan — once dependent on unreliable groundwater — now receives a lifeline from the Indira Gandhi Canal via the Rajasthan Canal Project. Canal water is treated and supplied to both the city and the IIT Jodhpur campus, enabling this world-class institution to operate in one of India's most arid regions.</p>
+
+          <div class="iit-card">
+            <h4>IIT Jodhpur — Innovation in the Desert</h4>
+            <p>Established in 2008 under the IITs Act, IIT Jodhpur's permanent campus at Karwar is directly sustained by the canal water supply infrastructure. The institute focuses on desert technology, solar energy, and sustainable engineering — fitting for an institution powered by a desert water project. Without the IGC supply chain, a campus of this scale would be impossible in the Thar.</p>
+          </div>
+
+          <div class="water-flow-mini">
+            <h4>How Water Reaches Jodhpur</h4>
+            <div class="flow-steps">
+              <div class="flow-step">Harike Barrage</div>
+              <div class="flow-arrow">→</div>
+              <div class="flow-step">Main Canal</div>
+              <div class="flow-arrow">→</div>
+              <div class="flow-step">Stage II</div>
+              <div class="flow-arrow">→</div>
+              <div class="flow-step highlight">Jodhpur Branch</div>
+              <div class="flow-arrow">→</div>
+              <div class="flow-step highlight">Treatment Plant</div>
+              <div class="flow-arrow">→</div>
+              <div class="flow-step highlight">IIT Jodhpur</div>
+            </div>
+          </div>
+
+          <div class="stats-grid">
+            <div class="stat-card"><div class="stat-val">1.5 M</div><div class="stat-lbl">Jodhpur population served</div></div>
+            <div class="stat-card"><div class="stat-val">2008</div><div class="stat-lbl">IIT Jodhpur founded</div></div>
+            <div class="stat-card"><div class="stat-val">Karwar</div><div class="stat-lbl">IIT campus location</div></div>
+            <div class="stat-card"><div class="stat-val">Solar + Water</div><div class="stat-lbl">Campus sustainability</div></div>
+          </div>
+
+          <div class="links-section">
+            <h4>Explore Further</h4>
+            <a class="link-btn" href="https://iitj.ac.in" target="_blank"><span class="link-icon" style="background:rgba(255,157,46,0.12)">🎓</span><span>IIT Jodhpur Official Website</span><span class="link-arrow">↗</span></a>
+            <a class="link-btn" href="https://en.wikipedia.org/wiki/IIT_Jodhpur" target="_blank"><span class="link-icon" style="background:rgba(56,165,255,0.1)">📖</span><span>Wikipedia — IIT Jodhpur</span><span class="link-arrow">↗</span></a>
+            <a class="link-btn" href="https://www.youtube.com/results?search_query=IIT+Jodhpur+campus+Rajasthan" target="_blank"><span class="link-icon" style="background:rgba(255,80,80,0.1)">▶</span><span>YouTube — IIT Jodhpur campus tour</span><span class="link-arrow">↗</span></a>
+            <a class="link-btn" href="https://www.youtube.com/results?search_query=Jodhpur+Indira+Gandhi+Canal+water+supply" target="_blank"><span class="link-icon" style="background:rgba(255,80,80,0.1)">▶</span><span>YouTube — Canal water to Jodhpur</span><span class="link-arrow">↗</span></a>
+            <a class="link-btn" href="https://en.wikipedia.org/wiki/Indira_Gandhi_Canal" target="_blank"><span class="link-icon" style="background:rgba(56,165,255,0.1)">📖</span><span>Wikipedia — Indira Gandhi Canal</span><span class="link-arrow">↗</span></a>
+            <a class="link-btn" href="https://maps.google.com/?q=IIT+Jodhpur+Karwar+Rajasthan" target="_blank"><span class="link-icon" style="background:rgba(74,222,128,0.1)">📍</span><span>IIT Jodhpur on Google Maps</span><span class="link-arrow">↗</span></a>
+          </div>
+        </div>
+      </div>
+
+      <div class="loc-panel" id="loc-gajner" style="display:none">
+        <div class="loc-hero" style="background:linear-gradient(135deg,#020e04,#061a08)">
+          <svg viewBox="0 0 360 170">
+            <rect width="360" height="170" fill="#030e05"/>
+            <!-- Forest -->
+            <rect y="70" width="360" height="100" fill="#071408" opacity="0.9"/>
+            <!-- Trees -->
+            <polygon points="50,70 65,28 80,70" fill="#0f2a0f"/>
+            <polygon points="40,70 55,34 70,70" fill="#1a3a18"/>
+            <polygon points="110,70 125,20 140,70" fill="#0f2a0f"/>
+            <polygon points="170,70 185,24 200,70" fill="#1a3a18"/>
+            <polygon points="230,70 245,28 260,70" fill="#0f2a0f"/>
+            <polygon points="290,70 305,24 320,70" fill="#1a3a18"/>
+            <!-- Lake -->
+            <ellipse cx="180" cy="110" rx="120" ry="30" fill="#082030" opacity="0.9"/>
+            <ellipse cx="180" cy="110" rx="90" ry="22" fill="#0d3050" opacity="0.7"/>
+            <!-- Wildlife (bird silhouette) -->
+            <path d="M220,88 Q235,80 250,76 Q235,72 220,78Z" fill="#1a3a18" opacity="0.7"/>
+            <!-- Blackbuck -->
+            <ellipse cx="80" cy="135" rx="20" ry="9" fill="#142010" opacity="0.8"/>
+            <ellipse cx="76" cy="128" rx="9" ry="7" fill="#142010" opacity="0.8"/>
+            <text x="180" y="150" text-anchor="middle" font-size="13" fill="#70d870" font-family="Syne,sans-serif" font-weight="700">Gajner Wildlife Sanctuary</text>
+            <text x="180" y="164" text-anchor="middle" font-size="9" fill="#3a6a3a" font-family="Outfit,sans-serif">Canal-created wetland oasis in the desert</text>
+          </svg>
+          <button class="loc-close" onclick="closePanel()">✕</button>
+        </div>
+        <div class="loc-body">
+          <span class="loc-tag" style="background:rgba(74,222,128,0.12);color:#4ade80;">Wildlife</span>
+          <div class="loc-name">Gajner Wildlife Sanctuary</div>
+          <div class="loc-sub">Bikaner district · Accidental paradise</div>
+          <p class="loc-desc">Perhaps the most beautiful accident of the Indira Gandhi Canal — as water flowed through the Thar, it created new wetlands and forests. Gajner Sanctuary sprang to life, now home to nilgai, chinkara, blackbuck, and 150+ bird species. The historic Gajner Palace on the lake shore is now a heritage hotel, a testament to how water transforms everything.</p>
+          <div class="stats-grid">
+            <div class="stat-card"><div class="stat-val">80 km²</div><div class="stat-lbl">Sanctuary area</div></div>
+            <div class="stat-card"><div class="stat-val">150+</div><div class="stat-lbl">Bird species</div></div>
+            <div class="stat-card"><div class="stat-val">Blackbuck</div><div class="stat-lbl">Flagship species</div></div>
+            <div class="stat-card"><div class="stat-val">1887</div><div class="stat-lbl">Palace built</div></div>
+          </div>
+          <div class="links-section"><h4>Learn More</h4>
+            <a class="link-btn" href="https://en.wikipedia.org/wiki/Gajner_Wildlife_Sanctuary" target="_blank"><span class="link-icon" style="background:rgba(56,165,255,0.1)">📖</span><span>Wikipedia — Gajner Sanctuary</span><span class="link-arrow">↗</span></a>
+            <a class="link-btn" href="https://www.youtube.com/results?search_query=Gajner+Wildlife+Sanctuary+Bikaner" target="_blank"><span class="link-icon" style="background:rgba(255,80,80,0.1)">▶</span><span>YouTube — Gajner wildlife</span><span class="link-arrow">↗</span></a>
+            <a class="link-btn" href="https://maps.google.com/?q=Gajner+Wildlife+Sanctuary" target="_blank"><span class="link-icon" style="background:rgba(74,222,128,0.1)">📍</span><span>Google Maps</span><span class="link-arrow">↗</span></a>
+          </div>
+        </div>
+      </div>
+
+      <div class="loc-panel" id="loc-mohangarh" style="display:none">
+        <div class="loc-hero" style="background:linear-gradient(135deg,#100508,#180a05)">
+          <svg viewBox="0 0 360 170">
+            <rect width="360" height="170" fill="#0e0406"/>
+            <!-- Night sky -->
+            <rect y="0" width="360" height="95" fill="#100408"/>
+            <!-- Stars -->
+            <circle cx="40" cy="15" r="1" fill="white" opacity="0.7"/>
+            <circle cx="100" cy="8" r="1.5" fill="white" opacity="0.8"/>
+            <circle cx="180" cy="22" r="1" fill="white" opacity="0.6"/>
+            <circle cx="260" cy="10" r="1.5" fill="white" opacity="0.7"/>
+            <circle cx="310" cy="25" r="1" fill="white" opacity="0.5"/>
+            <circle cx="150" cy="5" r="1" fill="white" opacity="0.6"/>
+            <circle cx="220" cy="18" r="0.8" fill="white" opacity="0.5"/>
+            <!-- Dunes -->
+            <path d="M0,100 Q90,72 180,90 Q270,108 360,78 L360,170 L0,170Z" fill="#1e1005" opacity="0.95"/>
+            <path d="M0,120 Q70,102 140,116 Q200,128 280,110 L360,120 L360,170 L0,170Z" fill="#281408" opacity="0.7"/>
+            <!-- Canal end -->
+            <rect x="140" y="90" width="80" height="8" fill="#0a2040" rx="1"/>
+            <path d="M140,90 Q180,86 220,90 L220,98 Q180,94 140,98Z" fill="#1a4a80" opacity="0.8"/>
+            <!-- Terminal marker -->
+            <rect x="168" y="72" width="24" height="20" rx="2" fill="#281408"/>
+            <rect x="172" y="62" width="16" height="12" rx="1" fill="#321808"/>
+            <text x="180" y="60" text-anchor="middle" font-size="7" fill="#8a5030" font-family="Outfit,sans-serif" font-weight="600">TERMINAL</text>
+            <text x="180" y="148" text-anchor="middle" font-size="13" fill="#ff7060" font-family="Syne,sans-serif" font-weight="700">Mohangarh</text>
+            <text x="180" y="163" text-anchor="middle" font-size="9" fill="#8a4030" font-family="Outfit,sans-serif">End of 649 km journey · Deep Thar Desert</text>
+          </svg>
+          <button class="loc-close" onclick="closePanel()">✕</button>
+        </div>
+        <div class="loc-body">
+          <span class="loc-tag" style="background:rgba(255,107,107,0.12);color:#ff6b6b;">Terminal Point</span>
+          <div class="loc-name">Mohangarh</div>
+          <div class="loc-sub">Jaisalmer district · End of Stage II · 649 km from origin</div>
+          <p class="loc-desc">The final destination — 649 km from where it all began at Harike. Mohangarh sits in the heart of the Thar Desert, in Jaisalmer district. The arrival of canal water here completed Stage II, turning India's most desolate terrain into cultivable land. From this terminus, distributary channels fan out to irrigate thousands of hectares of former desert.</p>
+          <div class="stats-grid">
+            <div class="stat-card"><div class="stat-val">649 km</div><div class="stat-lbl">Total canal length</div></div>
+            <div class="stat-card"><div class="stat-val">Stage II</div><div class="stat-lbl">Project phase</div></div>
+            <div class="stat-card"><div class="stat-val">1.7 M ha</div><div class="stat-lbl">Total area irrigated</div></div>
+            <div class="stat-card"><div class="stat-val">Jaisalmer</div><div class="stat-lbl">District</div></div>
+          </div>
+          <div class="links-section"><h4>Learn More</h4>
+            <a class="link-btn" href="https://en.wikipedia.org/wiki/Indira_Gandhi_Canal#Stage_II" target="_blank"><span class="link-icon" style="background:rgba(56,165,255,0.1)">📖</span><span>Wikipedia — Canal Stage II</span><span class="link-arrow">↗</span></a>
+            <a class="link-btn" href="https://www.youtube.com/results?search_query=Indira+Gandhi+Canal+Mohangarh+Stage+2" target="_blank"><span class="link-icon" style="background:rgba(255,80,80,0.1)">▶</span><span>YouTube — Deep desert canal</span><span class="link-arrow">↗</span></a>
+            <a class="link-btn" href="https://maps.google.com/?q=Mohangarh+Jaisalmer+Rajasthan" target="_blank"><span class="link-icon" style="background:rgba(74,222,128,0.1)">📍</span><span>Google Maps</span><span class="link-arrow">↗</span></a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TIMELINE TAB -->
+    <div class="panel-view" id="tab-timeline">
+      <div class="timeline-panel">
+        <h3>Canal Timeline</h3>
+
+        <div class="timeline-item">
+          <div class="tl-dot">1948</div>
+          <div class="tl-content">
+            <div class="tl-year">1948</div>
+            <div class="tl-event">Proposal by Kanwar Sain</div>
+            <div class="tl-desc">Chief Engineer Kanwar Sain submits the first detailed proposal to bring Rajasthan Canal waters from the Sutlej–Beas rivers to the Thar Desert — a vision considered almost impossible at the time.</div>
+          </div>
+        </div>
+
+        <div class="timeline-item">
+          <div class="tl-dot">1952</div>
+          <div class="tl-content">
+            <div class="tl-year">1952</div>
+            <div class="tl-event">Harike Barrage Completed</div>
+            <div class="tl-desc">The Harike Barrage at the Beas–Sutlej confluence in Punjab is completed, creating the water source for the entire project.</div>
+          </div>
+        </div>
+
+        <div class="timeline-item">
+          <div class="tl-dot">1958</div>
+          <div class="tl-content">
+            <div class="tl-year">31 March 1958</div>
+            <div class="tl-event">Construction Begins</div>
+            <div class="tl-desc">PM Jawaharlal Nehru inaugurates construction of the Rajasthan Canal — one of the most ambitious irrigation projects in the world — calling it "the lifeline of Rajasthan."</div>
+          </div>
+        </div>
+
+        <div class="timeline-item">
+          <div class="tl-dot">1963</div>
+          <div class="tl-content">
+            <div class="tl-year">1963</div>
+            <div class="tl-event">Stage I Completed</div>
+            <div class="tl-desc">The first 189 km (Stage I) reaches Anupgarh, bringing water to Sri Ganganagar and transforming hundreds of thousands of hectares. Proof the project works.</div>
+          </div>
+        </div>
+
+        <div class="timeline-item">
+          <div class="tl-dot">1984</div>
+          <div class="tl-content">
+            <div class="tl-year">1984</div>
+            <div class="tl-event">Renamed Indira Gandhi Canal</div>
+            <div class="tl-desc">After PM Indira Gandhi's assassination, the Rajasthan Canal is renamed the Indira Gandhi Nahar Pariyojana in her honor — recognizing her strong support for Stage II expansion.</div>
+          </div>
+        </div>
+
+        <div class="timeline-item">
+          <div class="tl-dot" style="border-color:#ff9d2e;color:#ff9d2e">2000s</div>
+          <div class="tl-content">
+            <div class="tl-year">Early 2000s</div>
+            <div class="tl-event">Water reaches Jodhpur</div>
+            <div class="tl-desc">Canal water begins supplying Jodhpur city, a critical step for the Blue City's growing population and future infrastructure.</div>
+            <div class="tl-special">⭐ This enabled the eventual establishment of IIT Jodhpur's permanent campus at Karwar — water security was a prerequisite.</div>
+          </div>
+        </div>
+
+        <div class="timeline-item">
+          <div class="tl-dot" style="border-color:#ff9d2e;color:#ff9d2e">2008</div>
+          <div class="tl-content">
+            <div class="tl-year">2008</div>
+            <div class="tl-event">IIT Jodhpur Founded</div>
+            <div class="tl-desc">IIT Jodhpur is established as one of the new IITs, with its permanent campus at Karwar, Jodhpur — made possible in part by reliable canal-fed water supply to the desert city.</div>
+            <div class="tl-special">🎓 IIT Jodhpur's focus on desert tech, solar energy, and sustainability is made possible by the same canal infrastructure that transformed this region.</div>
+          </div>
+        </div>
+
+        <div class="timeline-item">
+          <div class="tl-dot">2010s</div>
+          <div class="tl-content">
+            <div class="tl-year">Ongoing</div>
+            <div class="tl-event">Stage II Expansion Continues</div>
+            <div class="tl-desc">Stage II work continues toward the 460 km Mohangarh terminal. Distributary networks expand across Bikaner, Barmer, and Jaisalmer districts — the final frontier of the Thar Desert.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STATS TAB -->
+    <div class="panel-view" id="tab-stats">
+      <div class="stats-panel">
+        <h3>Canal by the Numbers</h3>
+
+        <div class="big-stat">
+          <div class="big-stat-icon" style="background:rgba(56,165,255,0.1)">📏</div>
+          <div><div class="big-stat-val">649 km</div><div class="big-stat-lbl">Total length — longest irrigation canal in India</div></div>
+        </div>
+        <div class="big-stat">
+          <div class="big-stat-icon" style="background:rgba(74,222,128,0.1)">🌾</div>
+          <div><div class="big-stat-val">1.7 M ha</div><div class="big-stat-lbl">Hectares of desert turned into farmland</div></div>
+        </div>
+        <div class="big-stat">
+          <div class="big-stat-icon" style="background:rgba(245,200,66,0.1)">👥</div>
+          <div><div class="big-stat-val">~10 M</div><div class="big-stat-lbl">People benefiting directly</div></div>
+        </div>
+        <div class="big-stat">
+          <div class="big-stat-icon" style="background:rgba(180,139,250,0.1)">🏗️</div>
+          <div><div class="big-stat-val">1958–present</div><div class="big-stat-lbl">Ongoing construction since independence</div></div>
+        </div>
+        <div class="big-stat">
+          <div class="big-stat-icon" style="background:rgba(56,165,255,0.1)">💧</div>
+          <div><div class="big-stat-val">18,500 cusecs</div><div class="big-stat-lbl">Design discharge capacity at Harike</div></div>
+        </div>
+
+        <div class="jodhpur-highlight-box">
+          <h4>🏜️ Jodhpur & IIT Jodhpur</h4>
+          <div class="mini-stat"><span>City population served</span><span>1.5 million+</span></div>
+          <div class="mini-stat"><span>IIT founded</span><span>2008</span></div>
+          <div class="mini-stat"><span>IIT campus location</span><span>Karwar, Jodhpur</span></div>
+          <div class="mini-stat"><span>Key research areas</span><span>Desert tech, solar</span></div>
+          <div class="mini-stat"><span>Water supply source</span><span>IGNP canal network</span></div>
+          <div class="mini-stat"><span>Annual rainfall, Jodhpur</span><span>~350 mm (arid)</span></div>
+        </div>
+
+        <div class="big-stat">
+          <div class="big-stat-icon" style="background:rgba(255,157,46,0.1)">🌡️</div>
+          <div><div class="big-stat-val">350 mm/yr</div><div class="big-stat-lbl">Average Jodhpur rainfall — canal is essential</div></div>
+        </div>
+        <div class="big-stat">
+          <div class="big-stat-icon" style="background:rgba(74,222,128,0.1)">🐾</div>
+          <div><div class="big-stat-val">150+ species</div><div class="big-stat-lbl">Birds at Gajner — canal-created wetland</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── State ──
+let activeMarker = null;
+
+// ── Tab switching ──
+function switchTab(tab) {
+  document.querySelectorAll('.tab-btn').forEach((b,i) => b.classList.remove('active'));
+  document.querySelectorAll('.panel-view').forEach(v => v.classList.remove('active'));
+  const tabs = ['explore','timeline','stats'];
+  const idx = tabs.indexOf(tab);
+  document.querySelectorAll('.tab-btn')[idx].classList.add('active');
+  document.getElementById('tab-' + tab).classList.add('active');
+}
+
+// ── Show location ──
+function showLocation(id) {
+  // Hide default state
+  document.getElementById('defaultState').style.display = 'none';
+  // Hide all loc panels
+  document.querySelectorAll('.loc-panel').forEach(p => p.style.display = 'none');
+  // Show target
+  const panel = document.getElementById('loc-' + id);
+  if (panel) { panel.style.display = 'block'; panel.scrollTop = 0; }
+  // Switch to explore tab
+  switchTab('explore');
+  // Update active marker styling
+  if (activeMarker) activeMarker.classList.remove('active-marker');
+  const markerEl = document.querySelector(`[data-loc="${id}"]`);
+  if (markerEl) { markerEl.classList.add('active-marker'); activeMarker = markerEl; }
+}
+
+// ── Close panel ──
+function closePanel() {
+  document.querySelectorAll('.loc-panel').forEach(p => p.style.display = 'none');
+  document.getElementById('defaultState').style.display = 'flex';
+  if (activeMarker) { activeMarker.classList.remove('active-marker'); activeMarker = null; }
+}
+
+// ── Tooltips ──
+const tooltip = document.getElementById('mapTooltip');
+const markers = document.querySelectorAll('.marker-group');
+
+markers.forEach(marker => {
+  marker.addEventListener('mouseenter', (e) => {
+    const tip = marker.getAttribute('data-tip');
+    if (!tip) return;
+    tooltip.innerHTML = `<strong>${tip.split('—')[0]}</strong>${tip.includes('—') ? tip.split('—')[1] : ''}`;
+    tooltip.classList.add('visible');
+    moveTip(e);
+  });
+  marker.addEventListener('mousemove', moveTip);
+  marker.addEventListener('mouseleave', () => tooltip.classList.remove('visible'));
+});
+
+function moveTip(e) {
+  const rect = document.getElementById('mapContainer').getBoundingClientRect();
+  let x = e.clientX - rect.left + 14;
+  let y = e.clientY - rect.top - 48;
+  if (x + 200 > rect.width) x = e.clientX - rect.left - 200;
+  tooltip.style.left = x + 'px';
+  tooltip.style.top = y + 'px';
+}
+
+// ── Pulse ring animation (CSS only handles initial, JS respawns) ──
+// Animate pulse rings on the SVG
+document.querySelectorAll('.pulse-ring').forEach(ring => {
+  ring.addEventListener('animationend', () => {
+    ring.style.animation = 'none';
+    requestAnimationFrame(() => {
+      ring.style.animation = '';
+    });
+  });
+});
+
+// ── Auto-highlight Jodhpur on load ──
+setTimeout(() => {
+  const jdh = document.getElementById('jodhpurMarker');
+  if (jdh) {
+    jdh.style.filter = 'brightness(1.5) drop-shadow(0 0 14px #ff9d2e)';
+    setTimeout(() => { jdh.style.filter = ''; }, 2500);
+  }
+}, 800);
+</script>
+</body>
+</html>
