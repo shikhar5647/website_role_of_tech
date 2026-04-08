@@ -10,7 +10,7 @@ export default function Footer() {
           <span>The Role of Technology in Development</span>
         </div>
         <p className="footer-course">
-          HSS Course Project — IIT Jodhpur, 2025
+          IH Course Project — IIT Jodhpur, 2026
         </p>
         <p className="footer-note">
           A Humanities & Social Sciences exploration of the Indira Gandhi Canal
