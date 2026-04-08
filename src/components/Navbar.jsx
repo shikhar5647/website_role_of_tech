@@ -9,7 +9,6 @@ export default function Navbar() {
   const links = [
     { to: '/', label: 'The Canal' },
     { to: '/campus', label: 'IIT Jodhpur & Water' },
-    { to: '/map-analysis', label: 'Map Analysis' },
     { to: '/interviews', label: 'Interviews' },
     { to: '/team', label: 'Our Team' },
   ];

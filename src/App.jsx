@@ -5,7 +5,6 @@ import CanalPage from './pages/CanalPage';
 import CampusPage from './pages/CampusPage';
 import InterviewsPage from './pages/InterviewsPage';
 import TeamPage from './pages/TeamPage';
-import MapAnalysisPage from './pages/MapAnalysisPage';
 import ScrollToTop from './components/ScrollToTop';
 import './App.css';
 
@@ -21,7 +20,6 @@ export default function App() {
             <Route path="/campus" element={<CampusPage />} />
             <Route path="/interviews" element={<InterviewsPage />} />
             <Route path="/team" element={<TeamPage />} />
-            <Route path="/map-analysis" element={<MapAnalysisPage />} />
           </Routes>
         </main>
         <Footer />
